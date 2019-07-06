@@ -24,24 +24,21 @@
 
   export default {
     name: 'Table',
+    props: {
+      url: {
+        type: String,
+        required: true,
+      },
+      processId: {
+        type: String,
+        required: false,
+      },
+    },
     data() {
       return {
         polling: null,
         rows: [],
-        columns: [
-          {
-            label: 'id',
-            name: 'id',
-            sort: true,
-            uniqueId: true,
-          },
-          {
-            label: 'businessKey',
-            name: 'businessKey',
-            sort: true,
-            uniqueId: true,
-          },
-        ],
+        columns: [],
         classes: {
           table: {
             "table table-sm": true,
@@ -66,10 +63,17 @@
     },
     methods: {
       fetchData() {
-        fetch('http://localhost:8080/api/processes')
-          .then(response => response.json())
-          .then(response => (this.rows = response))
-          .catch(err => console.log(err));
+        if (this.processId) {
+          fetch(`${this.url}/variables/${this.processId}`)
+            .then(response => response.json())
+            .then(response => (this.rows = response))
+            .catch(err => console.log(err));
+        } else {
+          fetch(`${this.url}/processes`)
+            .then(response => response.json())
+            .then(response => (this.rows = response))
+            .catch(err => console.log(err));
+        }
       },
       pollingData() {
         this.polling = setInterval(() => {
@@ -84,6 +88,36 @@
       clearInterval(this.polling)
     },
     created() {
+      if (this.processId) {
+        this.columns = [
+          {
+            label: 'variable',
+            name: 'id',
+            sort: true,
+            uniqueId: true,
+          },
+          {
+            label: 'value',
+            name: 'value',
+            sort: true,
+          },
+        ]
+      } else {
+        this.columns = [
+          {
+            label: 'id',
+            name: 'id',
+            sort: true,
+            uniqueId: true,
+          },
+          {
+            label: 'businessKey',
+            name: 'businessKey',
+            sort: true,
+            uniqueId: true,
+          },
+        ]
+      };
       this.fetchData();
       this.pollingData();
     },

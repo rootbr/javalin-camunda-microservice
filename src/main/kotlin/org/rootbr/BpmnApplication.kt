@@ -8,8 +8,11 @@ import org.camunda.bpm.engine.ProcessEngineConfiguration
 import org.camunda.bpm.engine.impl.cfg.StandaloneInMemProcessEngineConfiguration
 import org.camunda.bpm.engine.variable.Variables
 import org.camunda.spin.plugin.impl.SpinProcessEnginePlugin
+import org.slf4j.LoggerFactory
 
 fun main(args: Array<String>) {
+    val log = LoggerFactory.getLogger("main")
+
     Javalin
         .create { config ->
             config.defaultContentType = "application/json"
@@ -33,8 +36,14 @@ fun main(args: Array<String>) {
             }
             event.serverStarted {
                 val repositoryService = BpmPlatform.getDefaultProcessEngine().repositoryService
-                repositoryService.createProcessDefinitionQuery().processDefinitionKey("process").singleResult()
-                    ?: repositoryService.createDeployment().addClasspathResource("process.bpmn").deployWithResult()
+                val result = repositoryService.createDeployment()
+                    .addClasspathResource("process.bpmn")
+                    .name("process")
+                    .enableDuplicateFiltering(true)
+                    .deployWithResult()
+                result.deployedProcessDefinitions?.let {
+                    log.info("Deploy resource \"{}\", version {}", it[0].key, it[0].version)
+                }
             }
         }
         .start(8080)
@@ -42,16 +51,26 @@ fun main(args: Array<String>) {
             path("/api") {
                 path("/activities") {
                     get(ApiCamunda::activities)
+                    path("/:processId") {
+                        get(ApiCamunda::activitiesProcess)
+                    }
+                }
+                path("/variables/:processId") {
+                    get(ApiCamunda::variables)
                 }
                 path("/processes") {
                     get(ApiCamunda::processes)
                 }
                 path("/process") {
                     get(ApiCamunda::process)
+                    path("/deployment/create") {
+                        post(ApiCamunda::deploy)
+                    }
                 }
                 path("/message/:messageName") {
                     post(ApiCamunda::message)
                 }
+
             }
         }
 }

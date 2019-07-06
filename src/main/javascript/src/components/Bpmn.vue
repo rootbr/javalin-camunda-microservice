@@ -15,6 +15,10 @@
         type: String,
         required: true,
       },
+      processId: {
+        type: String,
+        required: false,
+      },
     },
     data() {
       return {
@@ -25,7 +29,7 @@
     mounted() {
       const {container} = this.$refs;
       this.bpmnViewer = new BpmnJS({container});
-      const { url, bpmnViewer, fetchDiagram } = this;
+      const { url, processId, bpmnViewer, fetchDiagram } = this;
       bpmnViewer.on('import.done', ({error, warnings}) => {
         error
           ? this.$emit('error', error)
@@ -35,13 +39,17 @@
           .get('canvas')
           .zoom('fit-viewport');
 
-        fetch('http://localhost:8080/api/activities')
-          .then(response => response.json())
-          .then(myJson => this.activities = myJson);
+        if (processId) {
+          fetch(`${url}/activities/${processId}`)
+            .then(response => response.json())
+            .then(myJson => this.activities = myJson);
+        } else {
+          fetch(`${url}/activities`)
+            .then(response => response.json())
+            .then(myJson => this.activities = myJson);
+        }
       });
-      if (url) {
-        fetchDiagram(url);
-      }
+      fetchDiagram(`${url}/process`);
     },
     beforeDestroy() {
       this.bpmnViewer.destroy();
@@ -49,7 +57,7 @@
     watch: {
       url(val) {
         this.$emit('loading');
-        this.fetch(url);
+        this.fetchDiagram(`${val}/process`);
       },
       diagramXML(val) {
         this.bpmnViewer.importXML(val);

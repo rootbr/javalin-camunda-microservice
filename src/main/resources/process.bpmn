@@ -5,23 +5,21 @@
     <bpmn:endEvent id="success" name="success">
       <bpmn:incoming>SequenceFlow_00df0jh</bpmn:incoming>
     </bpmn:endEvent>
-    <bpmn:sequenceFlow id="SequenceFlow_0bzstzf" sourceRef="userTask_1" targetRef="userTask_2" />
     <bpmn:userTask id="userTask_1" name="task 1" camunda:assignee="admin">
       <bpmn:incoming>SequenceFlow_0j3f1l8</bpmn:incoming>
-      <bpmn:outgoing>SequenceFlow_0bzstzf</bpmn:outgoing>
     </bpmn:userTask>
     <bpmn:boundaryEvent id="BoundaryEvent_0ng7dnw" name="CANCEL" attachedToRef="userTask_1">
       <bpmn:outgoing>SequenceFlow_1tdxcml</bpmn:outgoing>
       <bpmn:messageEventDefinition messageRef="Message_0y80zre" />
     </bpmn:boundaryEvent>
     <bpmn:endEvent id="cancel" name="cancel">
-      <bpmn:incoming>SequenceFlow_1tdxcml</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow_1horxrq</bpmn:incoming>
     </bpmn:endEvent>
-    <bpmn:sequenceFlow id="SequenceFlow_1tdxcml" sourceRef="BoundaryEvent_0ng7dnw" targetRef="cancel" />
+    <bpmn:sequenceFlow id="SequenceFlow_1tdxcml" sourceRef="BoundaryEvent_0ng7dnw" targetRef="userTask_cancel" />
     <bpmn:endEvent id="repeat" name="repeat">
-      <bpmn:incoming>SequenceFlow_1fx42b3</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow_066kxug</bpmn:incoming>
     </bpmn:endEvent>
-    <bpmn:sequenceFlow id="SequenceFlow_1fx42b3" sourceRef="BoundaryEvent_0hozq1t" targetRef="repeat" />
+    <bpmn:sequenceFlow id="SequenceFlow_1fx42b3" sourceRef="BoundaryEvent_0hozq1t" targetRef="userTask_repeat" />
     <bpmn:boundaryEvent id="BoundaryEvent_0hozq1t" name="UPDATE" cancelActivity="false" attachedToRef="userTask_1">
       <bpmn:outgoing>SequenceFlow_1fx42b3</bpmn:outgoing>
       <bpmn:messageEventDefinition id="MessageEventDefinition_0la6we3" messageRef="Message_00ukx18" />
@@ -32,13 +30,29 @@
     </bpmn:startEvent>
     <bpmn:sequenceFlow id="SequenceFlow_00df0jh" sourceRef="userTask_2" targetRef="success" />
     <bpmn:userTask id="userTask_2" name="task 2">
-      <bpmn:incoming>SequenceFlow_0bzstzf</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow_1q1xmrc</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_00df0jh</bpmn:outgoing>
     </bpmn:userTask>
+    <bpmn:sequenceFlow id="SequenceFlow_1horxrq" sourceRef="userTask_cancel" targetRef="cancel" />
+    <bpmn:userTask id="userTask_cancel" name="task cancel">
+      <bpmn:incoming>SequenceFlow_1tdxcml</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_1horxrq</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:sequenceFlow id="SequenceFlow_066kxug" sourceRef="userTask_repeat" targetRef="repeat" />
+    <bpmn:userTask id="userTask_repeat" name="task repeat">
+      <bpmn:incoming>SequenceFlow_1fx42b3</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_066kxug</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:boundaryEvent id="BoundaryEvent_0tvinpy" attachedToRef="userTask_1">
+      <bpmn:outgoing>SequenceFlow_1q1xmrc</bpmn:outgoing>
+      <bpmn:messageEventDefinition messageRef="Message_07imuh1" />
+    </bpmn:boundaryEvent>
+    <bpmn:sequenceFlow id="SequenceFlow_1q1xmrc" sourceRef="BoundaryEvent_0tvinpy" targetRef="userTask_2" />
   </bpmn:process>
   <bpmn:message id="Message_0y80zre" name="CANCEL" />
   <bpmn:message id="Message_00ukx18" name="UPDATE" />
   <bpmn:message id="Message_0jt15cc" name="START" />
+  <bpmn:message id="Message_07imuh1" name="NEXT" />
   <bpmndi:BPMNDiagram id="BPMNDiagram_1">
     <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="process">
       <bpmndi:BPMNEdge id="SequenceFlow_0j3f1l8_di" bpmnElement="SequenceFlow_0j3f1l8">
@@ -51,10 +65,6 @@
           <dc:Bounds x="642" y="146" width="41" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge id="SequenceFlow_0bzstzf_di" bpmnElement="SequenceFlow_0bzstzf">
-        <di:waypoint x="385" y="121" />
-        <di:waypoint x="465" y="121" />
-      </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="UserTask_0eqhzua_di" bpmnElement="userTask_1">
         <dc:Bounds x="285" y="81" width="100" height="80" />
       </bpmndi:BPMNShape>
@@ -65,26 +75,26 @@
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="EndEvent_0v18e15_di" bpmnElement="cancel">
-        <dc:Bounds x="448" y="188" width="36" height="36" />
+        <dc:Bounds x="644" y="198" width="36" height="36" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="451" y="231" width="32" height="14" />
+          <dc:Bounds x="647" y="241" width="32" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="SequenceFlow_1tdxcml_di" bpmnElement="SequenceFlow_1tdxcml">
         <di:waypoint x="368" y="179" />
-        <di:waypoint x="368" y="206" />
-        <di:waypoint x="448" y="206" />
+        <di:waypoint x="368" y="216" />
+        <di:waypoint x="465" y="216" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="EndEvent_0q90pnv_di" bpmnElement="repeat">
-        <dc:Bounds x="448" y="276" width="36" height="36" />
+        <dc:Bounds x="644" y="288" width="36" height="36" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="450" y="319" width="32" height="14" />
+          <dc:Bounds x="646" y="331" width="32" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="SequenceFlow_1fx42b3_di" bpmnElement="SequenceFlow_1fx42b3">
         <di:waypoint x="285" y="179" />
-        <di:waypoint x="285" y="294" />
-        <di:waypoint x="448" y="294" />
+        <di:waypoint x="285" y="306" />
+        <di:waypoint x="465" y="306" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="BoundaryEvent_1ri32l9_di" bpmnElement="BoundaryEvent_0hozq1t">
         <dc:Bounds x="267" y="143" width="36" height="36" />
@@ -105,6 +115,27 @@
       <bpmndi:BPMNShape id="UserTask_0pwgs7w_di" bpmnElement="userTask_2">
         <dc:Bounds x="465" y="81" width="100" height="80" />
       </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow_1horxrq_di" bpmnElement="SequenceFlow_1horxrq">
+        <di:waypoint x="565" y="216" />
+        <di:waypoint x="644" y="216" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="UserTask_0ih649d_di" bpmnElement="userTask_cancel">
+        <dc:Bounds x="465" y="176" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow_066kxug_di" bpmnElement="SequenceFlow_066kxug">
+        <di:waypoint x="565" y="306" />
+        <di:waypoint x="644" y="306" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="UserTask_02o9ueo_di" bpmnElement="userTask_repeat">
+        <dc:Bounds x="465" y="266" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BoundaryEvent_1gbvr2a_di" bpmnElement="BoundaryEvent_0tvinpy">
+        <dc:Bounds x="367" y="103" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow_1q1xmrc_di" bpmnElement="SequenceFlow_1q1xmrc">
+        <di:waypoint x="403" y="121" />
+        <di:waypoint x="465" y="121" />
+      </bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>
 </bpmn:definitions>
