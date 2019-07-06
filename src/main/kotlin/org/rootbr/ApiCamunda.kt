@@ -19,7 +19,7 @@ object ApiCamunda {
 
     fun activitiesProcess(ctx: Context) {
         val processId = ctx.pathParam(":processId")
-        ctx.json(taskService.createTaskQuery().processInstanceId(processId).list().groupingBy { it.taskDefinitionKey }.eachCount())
+        ctx.json(runtimeService.getActiveActivityIds(processId).groupingBy { it }.eachCount())
     }
 
     fun variables(ctx: Context) {
@@ -35,7 +35,6 @@ object ApiCamunda {
     }
 
     fun deploy(ctx: Context) {
-        val repositoryService = BpmPlatform.getDefaultProcessEngine().repositoryService
         val uploadedFile = ctx.uploadedFile("process.bpmn")!!
         val result = repositoryService.createDeployment()
             .addInputStream(uploadedFile.filename, uploadedFile.content)

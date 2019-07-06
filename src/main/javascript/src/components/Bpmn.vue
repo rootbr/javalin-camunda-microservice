@@ -60,6 +60,10 @@
           fetch(`${this.url}/activities/${val}`)
             .then(response => response.json())
             .then(myJson => this.activities = myJson);
+        } else {
+          fetch(`${this.url}/activities`)
+            .then(response => response.json())
+            .then(myJson => this.activities = myJson);
         }
       },
       url(val) {
@@ -69,16 +73,27 @@
       diagramXML(val) {
         this.bpmnViewer.importXML(val);
       },
-      activities(val) {
-        Object.entries(val).forEach(([key, value]) => {
-          this.bpmnViewer.get('overlays').add(key, {
-            position: {
-              top: 5,
-              right: 25,
-            },
-            html: `<div class="success-message">${value}</div>`
+      activities(newVal, oldVal){
+        console.log("change old activities " + JSON.stringify(oldVal));
+        console.log("change new activities " + JSON.stringify(newVal));
+        let overlays = this.bpmnViewer.get('overlays');
+
+        if (oldVal) {
+          Object.entries(oldVal).forEach(([key, value]) => {
+            overlays.remove({element: key});
           });
-        })
+        }
+        if (newVal) {
+          Object.entries(newVal).forEach(([key, value]) => {
+            overlays.add(key, {
+              position: {
+                top: 5,
+                right: 25,
+              },
+              html: `<div class="success-message">${value}</div>`
+            });
+          })
+        }
       },
     },
     methods: {

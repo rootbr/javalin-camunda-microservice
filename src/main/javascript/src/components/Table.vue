@@ -6,6 +6,8 @@
       :config="config"
       :classes="classes"
       @on-select-row="onSelectRow"
+      :actions="actions"
+      @on-back="onBack"
     >
       <template slot="sort-asc-icon">
         <i class="fas fa-sort-amount-down"></i>
@@ -46,6 +48,13 @@
             "table table-sm": true,
           },
         },
+        actions: [
+          {
+            btn_text: "back",
+            event_name: "on-back",
+            class: "btn btn-danger",
+          }
+        ],
         config: {
           card_mode: false,
           show_refresh_button: false,
@@ -64,18 +73,52 @@
       };
     },
     methods: {
+      onBack() {
+        this.selectedProcessId = null;
+        this.config.rows_selectable = true;
+        this.fetchData();
+        this.$emit('onSelectRow', null)
+      },
       onSelectRow(event) {
         this.selectedProcessId = event.selected_item.id;
+        this.config.rows_selectable = false;
         this.fetchData();
-        this.$emit('onSelectRow', this.selectedProcessId)
+        this.$emit('onSelectRow', this.selectedProcessId);
       },
       fetchData() {
         if (this.selectedProcessId) {
+          this.columns = [
+            {
+              label: 'variable',
+              name: 'id',
+              sort: true,
+              uniqueId: true,
+            },
+            {
+              label: 'value',
+              name: 'value',
+              sort: true,
+            },
+          ];
           fetch(`${this.url}/variables/${this.selectedProcessId}`)
             .then(response => response.json())
             .then(response => (this.rows = response))
             .catch(err => console.log(err));
         } else {
+          this.columns = [
+            {
+              label: 'id',
+              name: 'id',
+              sort: true,
+              uniqueId: true,
+            },
+            {
+              label: 'businessKey',
+              name: 'businessKey',
+              sort: true,
+              uniqueId: true,
+            },
+          ];
           fetch(`${this.url}/processes`)
             .then(response => response.json())
             .then(response => (this.rows = response))
@@ -95,37 +138,7 @@
       clearInterval(this.polling)
     },
     created() {
-      if (this.processId) {
-        this.selectedProcessId = processId;
-        this.columns = [
-          {
-            label: 'variable',
-            name: 'id',
-            sort: true,
-            uniqueId: true,
-          },
-          {
-            label: 'value',
-            name: 'value',
-            sort: true,
-          },
-        ]
-      } else {
-        this.columns = [
-          {
-            label: 'id',
-            name: 'id',
-            sort: true,
-            uniqueId: true,
-          },
-          {
-            label: 'businessKey',
-            name: 'businessKey',
-            sort: true,
-            uniqueId: true,
-          },
-        ]
-      };
+      this.selectedProcessId = this.processId;
       this.fetchData();
       this.pollingData();
     },

@@ -1,13 +1,20 @@
-POST http://localhost:8080/api/message/START?businessKey=1
+POST http://localhost:8080/api/message/START?businessKey=2
 Content-Type: application/json
 
 {"var":"val"}
-
 ###
-
 POST http://localhost:8080/api/message/CANCEL?businessKey=1
 Content-Type: application/json
 
 {"var2":"val2"}
+###
+POST http://localhost:8080/api/message/NEXT?businessKey=1
+Content-Type: application/json
 
+{"var3":"val3"}
+###
+POST http://localhost:8080/api/message/UPDATE?businessKey=2
+Content-Type: application/json
+
+{"var3":"val3"}
 ###
