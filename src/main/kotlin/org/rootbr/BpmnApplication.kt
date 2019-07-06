@@ -43,6 +43,9 @@ fun main(args: Array<String>) {
                 path("/activities") {
                     get(ApiCamunda::activities)
                 }
+                path("/processes") {
+                    get(ApiCamunda::processes)
+                }
                 path("/process") {
                     get(ApiCamunda::process)
                 }

@@ -80,7 +80,7 @@
 
 <style lang="scss">
   .container {
-    height: 70vh;
+    height: 40vh;
   }
   .success-message {
     color: green;

@@ -17,14 +17,28 @@ object ApiCamunda {
         ctx.result(repositoryService.getProcessModel(processDefinition().id))
     }
 
+    fun processes(ctx: Context) {
+        ctx.json(runtimeService.createProcessInstanceQuery().list().map {
+            ProcessInstanceDto(
+                it.processInstanceId,
+                it.businessKey
+            )
+        })
+    }
+
+
     fun message(ctx: Context) {
         val messageName = ctx.pathParam(":messageName")
-        runtimeService.createMessageCorrelation(messageName)
-            .setVariable(messageName, Spin.JSON(ctx.body()))
-            .correlateAll()
+        runtimeService.createMessageCorrelation(messageName).apply {
+            ctx.queryParam("businessKey")?.let { this.processInstanceBusinessKey(it) }
+            setVariable(messageName, Spin.JSON(ctx.body()))
+            correlateAll()
+        }
         ctx.status(204)
     }
 
     private fun processDefinition() =
         repositoryService.createProcessDefinitionQuery().processDefinitionKey("process").singleResult()
 }
+
+data class ProcessInstanceDto(val id: String, val businessKey: String?)
