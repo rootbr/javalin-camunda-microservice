@@ -1,8 +1,8 @@
 <template>
   <div id="app">
     <div id="nav">
-      <router-link to="/">Bpmn</router-link> |
-      <router-link to="/about">About</router-link>
+      <router-link to="/">BPMN</router-link> |
+      <router-link to="/process">process</router-link>
     </div>
     <router-view/>
   </div>

@@ -66,11 +66,14 @@
     },
     methods: {
       fetchData() {
+        fetch('http://localhost:8080/api/processes')
+          .then(response => response.json())
+          .then(response => (this.rows = response))
+          .catch(err => console.log(err));
+      },
+      pollingData() {
         this.polling = setInterval(() => {
-          fetch('http://localhost:8080/api/processes')
-            .then(response => response.json())
-            .then(response => (this.rows = response))
-            .catch(err => console.log(err));
+          this.fetchData();
         }, 500)
       },
     },
@@ -81,7 +84,8 @@
       clearInterval(this.polling)
     },
     created() {
-      this.fetchData()
+      this.fetchData();
+      this.pollingData();
     },
   };
 </script>
