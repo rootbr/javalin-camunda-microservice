@@ -16,7 +16,7 @@
     },
     data() {
       return {
-        url: 'http://localhost:8080/process.bpmn',
+        url: 'http://localhost:8080/api/process',
       };
     },
   };
