@@ -6,6 +6,15 @@
       :config="config"
       :classes="classes"
     >
+      <template slot="sort-asc-icon">
+        <i class="fas fa-sort-amount-down"></i>
+      </template>
+      <template slot="sort-desc-icon">
+        <i class="fas fa-sort-amount-up"></i>
+      </template>
+      <template slot="no-sort-icon">
+        <i class="fas fa-sort"></i>
+      </template>
     </vue-bootstrap4-table>
   </div>
 </template>
