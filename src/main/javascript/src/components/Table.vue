@@ -127,12 +127,7 @@
     },
     watch: {
       selectedProcessId(val) {
-        console.log(val);
-        if (val) {
-          this.config.rows_selectable = false;
-        } else {
-          this.config.rows_selectable = true;
-        }
+        this.config.rows_selectable = !val;
         this.fetchData();
         this.$emit('onSelectRow', val);
       },
