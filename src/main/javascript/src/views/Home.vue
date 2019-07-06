@@ -29,7 +29,6 @@
     },
     methods: {
       onSelectProcess(s) {
-        console.log(s);
         this.processIdScheme = s
       },
     },

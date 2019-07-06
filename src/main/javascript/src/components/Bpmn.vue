@@ -29,7 +29,7 @@
     mounted() {
       const {container} = this.$refs;
       this.bpmnViewer = new BpmnJS({container});
-      const { url, processId, bpmnViewer, fetchDiagram } = this;
+      const {fetchActivities, bpmnViewer, fetchDiagram} = this;
       bpmnViewer.on('import.done', ({error, warnings}) => {
         error
           ? this.$emit('error', error)
@@ -39,45 +39,26 @@
           .get('canvas')
           .zoom('fit-viewport');
 
-        if (processId) {
-          fetch(`${url}/activities/${processId}`)
-            .then(response => response.json())
-            .then(myJson => this.activities = myJson);
-        } else {
-          fetch(`${url}/activities`)
-            .then(response => response.json())
-            .then(myJson => this.activities = myJson);
-        }
+        fetchActivities();
       });
-      fetchDiagram(`${url}/process`);
+      fetchDiagram();
     },
     beforeDestroy() {
       this.bpmnViewer.destroy();
     },
     watch: {
-      processId(val) {
-        if (val) {
-          fetch(`${this.url}/activities/${val}`)
-            .then(response => response.json())
-            .then(myJson => this.activities = myJson);
-        } else {
-          fetch(`${this.url}/activities`)
-            .then(response => response.json())
-            .then(myJson => this.activities = myJson);
-        }
+      processId() {
+        this.fetchActivities();
       },
-      url(val) {
+      url() {
         this.$emit('loading');
-        this.fetchDiagram(`${val}/process`);
+        this.fetchDiagram();
       },
       diagramXML(val) {
         this.bpmnViewer.importXML(val);
       },
-      activities(newVal, oldVal){
-        console.log("change old activities " + JSON.stringify(oldVal));
-        console.log("change new activities " + JSON.stringify(newVal));
+      activities(newVal, oldVal) {
         let overlays = this.bpmnViewer.get('overlays');
-
         if (oldVal) {
           Object.entries(oldVal).forEach(([key, value]) => {
             overlays.remove({element: key});
@@ -97,11 +78,22 @@
       },
     },
     methods: {
-      fetchDiagram(url) {
-        fetch(url)
+      fetchDiagram() {
+        fetch(`${this.url}/process`)
           .then(response => response.text())
           .then(text => (this.diagramXML = text))
           .catch(err => this.$emit('error', err));
+      },
+      fetchActivities() {
+        if (this.processId) {
+          fetch(`${this.url}/activities/${this.processId}`)
+            .then(response => response.json())
+            .then(myJson => this.activities = myJson);
+        } else {
+          fetch(`${this.url}/activities`)
+            .then(response => response.json())
+            .then(myJson => this.activities = myJson);
+        }
       }
     }
   }
@@ -112,6 +104,7 @@
   .container {
     height: 40vh;
   }
+
   .success-message {
     color: green;
     text-shadow: darkgreen;

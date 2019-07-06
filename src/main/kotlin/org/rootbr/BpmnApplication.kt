@@ -70,7 +70,6 @@ fun main(args: Array<String>) {
                 path("/message/:messageName") {
                     post(ApiCamunda::message)
                 }
-
             }
         }
 }

@@ -75,15 +75,9 @@
     methods: {
       onBack() {
         this.selectedProcessId = null;
-        this.config.rows_selectable = true;
-        this.fetchData();
-        this.$emit('onSelectRow', null)
       },
       onSelectRow(event) {
         this.selectedProcessId = event.selected_item.id;
-        this.config.rows_selectable = false;
-        this.fetchData();
-        this.$emit('onSelectRow', this.selectedProcessId);
       },
       fetchData() {
         if (this.selectedProcessId) {
@@ -128,7 +122,19 @@
       pollingData() {
         this.polling = setInterval(() => {
           this.fetchData();
-        }, 500)
+        }, 400)
+      },
+    },
+    watch: {
+      selectedProcessId(val) {
+        console.log(val);
+        if (val) {
+          this.config.rows_selectable = false;
+        } else {
+          this.config.rows_selectable = true;
+        }
+        this.fetchData();
+        this.$emit('onSelectRow', val);
       },
     },
     components: {
