@@ -14,9 +14,11 @@
 <script>
   import Bpmn from '@/components/Bpmn';
   import Table from "@/components/Table";
+  import { store } from '@/store'
 
   export default {
     name: 'Home',
+    store,
     components: {
       Table,
       Bpmn,
@@ -29,6 +31,7 @@
     },
     methods: {
       onSelectProcess(s) {
+        console.log(JSON.stringify(this.$store.state));
         this.processIdScheme = s
       },
     },
