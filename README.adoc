@@ -1,0 +1,5 @@
+= Camunda microservice rootbr
+
+_Kotlin, Javalin, Camunda, Custom Spin-Gson_
+
+*fast, small, simple*
