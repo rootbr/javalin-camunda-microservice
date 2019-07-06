@@ -1,7 +1,13 @@
 <template>
   <div>
-    <Bpmn :url="url"/>
-    <Table :url="url"/>
+    <Bpmn
+      :url="url"
+      :processId="processIdScheme"
+    />
+    <Table
+      :url="url"
+      @onSelectRow='onSelectProcess'
+    />
   </div>
 </template>
 
@@ -18,7 +24,14 @@
     data() {
       return {
         url: 'http://localhost:8080/api',
+        processIdScheme: null,
       };
+    },
+    methods: {
+      onSelectProcess(s) {
+        console.log(s);
+        this.processIdScheme = s
+      },
     },
   };
 </script>

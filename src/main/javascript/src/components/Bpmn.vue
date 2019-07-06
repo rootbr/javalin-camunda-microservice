@@ -55,6 +55,13 @@
       this.bpmnViewer.destroy();
     },
     watch: {
+      processId(val) {
+        if (val) {
+          fetch(`${this.url}/activities/${val}`)
+            .then(response => response.json())
+            .then(myJson => this.activities = myJson);
+        }
+      },
       url(val) {
         this.$emit('loading');
         this.fetchDiagram(`${val}/process`);
@@ -72,7 +79,7 @@
             html: `<div class="success-message">${value}</div>`
           });
         })
-      }
+      },
     },
     methods: {
       fetchDiagram(url) {

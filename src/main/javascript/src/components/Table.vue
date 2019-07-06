@@ -5,6 +5,7 @@
       :columns="columns"
       :config="config"
       :classes="classes"
+      @on-select-row="onSelectRow"
     >
       <template slot="sort-asc-icon">
         <i class="fas fa-sort-amount-down"></i>
@@ -37,6 +38,7 @@
     data() {
       return {
         polling: null,
+        selectedProcessId: null,
         rows: [],
         columns: [],
         classes: {
@@ -50,7 +52,7 @@
           show_reset_button: false,
           pagination: false,
           pagination_info: false,
-          rows_selectable: false,
+          rows_selectable: true,
           global_search: {
             placeholder: "search text",
             visibility: true,
@@ -62,9 +64,14 @@
       };
     },
     methods: {
+      onSelectRow(event) {
+        this.selectedProcessId = event.selected_item.id;
+        this.fetchData();
+        this.$emit('onSelectRow', this.selectedProcessId)
+      },
       fetchData() {
-        if (this.processId) {
-          fetch(`${this.url}/variables/${this.processId}`)
+        if (this.selectedProcessId) {
+          fetch(`${this.url}/variables/${this.selectedProcessId}`)
             .then(response => response.json())
             .then(response => (this.rows = response))
             .catch(err => console.log(err));
@@ -89,6 +96,7 @@
     },
     created() {
       if (this.processId) {
+        this.selectedProcessId = processId;
         this.columns = [
           {
             label: 'variable',
