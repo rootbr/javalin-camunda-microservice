@@ -24,6 +24,7 @@
 
 <script>
   import VueBootstrap4Table from 'vue-bootstrap4-table';
+  import { mapState } from 'vuex';
 
   export default {
     name: 'Table',
@@ -78,6 +79,7 @@
       },
       onSelectRow(event) {
         this.selectedProcessId = event.selected_item.id;
+        this.$store.dispatch('fetchData');
       },
       fetchData() {
         if (this.selectedProcessId) {
@@ -131,7 +133,11 @@
         this.fetchData();
         this.$emit('onSelectRow', val);
       },
+      activities(oldVal, newVal) {
+        console.log(`Updating from ${JSON.stringify(oldVal)} to ${JSON.stringify(newVal)}`);
+      }
     },
+    computed: mapState(['activities']),
     components: {
       VueBootstrap4Table,
     },
