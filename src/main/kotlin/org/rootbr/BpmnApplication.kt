@@ -49,6 +49,12 @@ fun main(args: Array<String>) {
         .start(8080)
         .routes {
             path("/api") {
+                path("/state") {
+                    get(ApiCamunda::state)
+                    path("/:processId") {
+                        get(ApiCamunda::stateProcess)
+                    }
+                }
                 path("/activities") {
                     get(ApiCamunda::activities)
                     path("/:processId") {

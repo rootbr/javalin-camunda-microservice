@@ -24,20 +24,10 @@
 
 <script>
   import VueBootstrap4Table from 'vue-bootstrap4-table';
-  import { mapState } from 'vuex';
+  import {mapState} from 'vuex';
 
   export default {
     name: 'Table',
-    props: {
-      url: {
-        type: String,
-        required: true,
-      },
-      processId: {
-        type: String,
-        required: false,
-      },
-    },
     data() {
       return {
         polling: null,
@@ -79,65 +69,28 @@
       },
       onSelectRow(event) {
         this.selectedProcessId = event.selected_item.id;
-        this.$store.dispatch('fetchData');
-      },
-      fetchData() {
-        if (this.selectedProcessId) {
-          this.columns = [
-            {
-              label: 'variable',
-              name: 'id',
-              sort: true,
-              uniqueId: true,
-            },
-            {
-              label: 'value',
-              name: 'value',
-              sort: true,
-            },
-          ];
-          fetch(`${this.url}/variables/${this.selectedProcessId}`)
-            .then(response => response.json())
-            .then(response => (this.rows = response))
-            .catch(err => console.log(err));
-        } else {
-          this.columns = [
-            {
-              label: 'id',
-              name: 'id',
-              sort: true,
-              uniqueId: true,
-            },
-            {
-              label: 'businessKey',
-              name: 'businessKey',
-              sort: true,
-              uniqueId: true,
-            },
-          ];
-          fetch(`${this.url}/processes`)
-            .then(response => response.json())
-            .then(response => (this.rows = response))
-            .catch(err => console.log(err));
-        }
       },
       pollingData() {
+        this.$store.dispatch('fetchData');
         this.polling = setInterval(() => {
-          this.fetchData();
-        }, 400)
+          this.$store.dispatch('fetchData');
+        }, 350)
       },
+      update(data) {
+        this.columns = data.columns;
+        this.rows = data.rows;
+      }
     },
     watch: {
       selectedProcessId(val) {
         this.config.rows_selectable = !val;
-        this.fetchData();
-        this.$emit('onSelectRow', val);
+        this.$store.dispatch('changeProcessId', val);
       },
-      activities(oldVal, newVal) {
-        console.log(`Updating from ${JSON.stringify(oldVal)} to ${JSON.stringify(newVal)}`);
-      }
+      data(val) {
+        if (val != null) this.update(val)
+      },
     },
-    computed: mapState(['activities']),
+    computed: mapState(['data']),
     components: {
       VueBootstrap4Table,
     },
@@ -145,8 +98,6 @@
       clearInterval(this.polling)
     },
     created() {
-      this.selectedProcessId = this.processId;
-      this.fetchData();
       this.pollingData();
     },
   };
