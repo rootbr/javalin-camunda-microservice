@@ -6,10 +6,24 @@ import io.javalin.websocket.WsContext
 import org.camunda.bpm.BpmPlatform
 import org.camunda.bpm.container.RuntimeContainerDelegate
 import org.camunda.bpm.engine.ProcessEngineConfiguration
+import org.camunda.bpm.engine.delegate.DelegateExecution
+import org.camunda.bpm.engine.delegate.DelegateTask
+import org.camunda.bpm.engine.delegate.ExecutionListener
+import org.camunda.bpm.engine.delegate.TaskListener
+import org.camunda.bpm.engine.impl.bpmn.behavior.UserTaskActivityBehavior
+import org.camunda.bpm.engine.impl.bpmn.parser.AbstractBpmnParseListener
+import org.camunda.bpm.engine.impl.bpmn.parser.BpmnParseListener
+import org.camunda.bpm.engine.impl.cfg.AbstractProcessEnginePlugin
+import org.camunda.bpm.engine.impl.cfg.ProcessEngineConfigurationImpl
 import org.camunda.bpm.engine.impl.cfg.StandaloneInMemProcessEngineConfiguration
+import org.camunda.bpm.engine.impl.persistence.entity.ProcessDefinitionEntity
+import org.camunda.bpm.engine.impl.pvm.process.ActivityImpl
+import org.camunda.bpm.engine.impl.pvm.process.ScopeImpl
+import org.camunda.bpm.engine.impl.util.xml.Element
 import org.camunda.bpm.engine.variable.Variables
 import org.camunda.spin.plugin.impl.SpinProcessEnginePlugin
 import org.slf4j.LoggerFactory
+import java.util.*
 
 fun main(args: Array<String>) {
     val log = LoggerFactory.getLogger("main")
@@ -27,6 +41,7 @@ fun main(args: Array<String>) {
                     (ProcessEngineConfiguration.createStandaloneInMemProcessEngineConfiguration()
                             as StandaloneInMemProcessEngineConfiguration).apply {
                         processEnginePlugins.add(SpinProcessEnginePlugin())
+                        processEnginePlugins.add(UserTaskParseListenerPlugin)
                         defaultSerializationFormat = Variables.SerializationDataFormats.JSON.name
                         databaseSchemaUpdate = ProcessEngineConfiguration.DB_SCHEMA_UPDATE_TRUE
                         jdbcUrl =
@@ -82,3 +97,66 @@ fun main(args: Array<String>) {
 }
 
 val WsContext.processId: String get() = this.pathParam("process-id")
+
+object UserTaskParseListenerPlugin : AbstractProcessEnginePlugin() {
+    override fun preInit(processEngineConfiguration: ProcessEngineConfigurationImpl) {
+        var preParseListeners: MutableList<BpmnParseListener>? = processEngineConfiguration.customPreBPMNParseListeners
+        if (preParseListeners == null) {
+            preParseListeners = ArrayList()
+            processEngineConfiguration.customPreBPMNParseListeners = preParseListeners
+        }
+        preParseListeners.add(UserTaskParseListener)
+    }
+}
+
+object UserTaskParseListener : AbstractBpmnParseListener() {
+    override fun parseProcess(processElement: Element?, processDefinition: ProcessDefinitionEntity) {
+        processDefinition.addListener(
+            ExecutionListener.EVENTNAME_START,
+            UniquenessBusinessKeyProcessStartEventListener
+        )
+    }
+
+    override fun parseUserTask(userTaskElement: Element?, scope: ScopeImpl?, activity: ActivityImpl) {
+        val activityBehavior = activity.activityBehavior
+        if (activityBehavior is UserTaskActivityBehavior) {
+            activityBehavior.taskDefinition.apply {
+                addTaskListener(TaskListener.EVENTNAME_CREATE, AuditTaskListener)
+                addTaskListener(TaskListener.EVENTNAME_DELETE, AuditTaskListener)
+            }
+        }
+    }
+}
+
+object AuditTaskListener : TaskListener {
+    val log = LoggerFactory.getLogger(AuditTaskListener::class.java)
+    override fun notify(delegateTask: DelegateTask) {
+        log.info(delegateTask.eventName)
+    }
+}
+
+object UniquenessBusinessKeyProcessStartEventListener : ExecutionListener {
+    override fun notify(execution: DelegateExecution) {
+        val businessKey = execution.processBusinessKey
+        val runtimeService = execution.processEngineServices.runtimeService
+        if (businessKey != null) {
+            val processDefinitionId = execution.processDefinitionId
+            val count = runtimeService
+                .createExecutionQuery()
+                .processDefinitionId(processDefinitionId)
+                .processInstanceBusinessKey(businessKey)
+                .count()
+            if (count > 0)
+                throw NotUniqueBusinessKeyException("Business key [$businessKey] not unique in runtime for definition ID [$processDefinitionId].")
+        }
+    }
+}
+
+class NotUniqueBusinessKeyException : RuntimeException {
+    protected constructor() : super() {}
+    constructor(message: String) : super(message) {}
+
+    companion object {
+        private val serialVersionUID = -1L
+    }
+}
