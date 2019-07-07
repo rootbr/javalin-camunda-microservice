@@ -7,6 +7,7 @@
 
 <script>
   import BpmnJS from 'bpmn-js';
+  import {mapState} from 'vuex';
 
   export default {
     name: 'Bpmn',
@@ -29,7 +30,7 @@
     mounted() {
       const {container} = this.$refs;
       this.bpmnViewer = new BpmnJS({container});
-      const {fetchActivities, bpmnViewer, fetchDiagram} = this;
+      const {bpmnViewer, fetchDiagram} = this;
       bpmnViewer.on('import.done', ({error, warnings}) => {
         error
           ? this.$emit('error', error)
@@ -38,8 +39,6 @@
         bpmnViewer
           .get('canvas')
           .zoom('fit-viewport');
-
-        fetchActivities();
       });
       fetchDiagram();
     },
@@ -47,9 +46,6 @@
       this.bpmnViewer.destroy();
     },
     watch: {
-      processId() {
-        this.fetchActivities();
-      },
       url() {
         this.$emit('loading');
         this.fetchDiagram();
@@ -57,24 +53,8 @@
       diagramXML(val) {
         this.bpmnViewer.importXML(val);
       },
-      activities(newVal, oldVal) {
-        let overlays = this.bpmnViewer.get('overlays');
-        if (oldVal) {
-          Object.entries(oldVal).forEach(([key, value]) => {
-            overlays.remove({element: key});
-          });
-        }
-        if (newVal) {
-          Object.entries(newVal).forEach(([key, value]) => {
-            overlays.add(key, {
-              position: {
-                top: 5,
-                right: 25,
-              },
-              html: `<div class="success-message">${value}</div>`
-            });
-          })
-        }
+      data(newVal, oldVal) {
+        this.update(newVal, oldVal)
       },
     },
     methods: {
@@ -84,18 +64,31 @@
           .then(text => (this.diagramXML = text))
           .catch(err => this.$emit('error', err));
       },
-      fetchActivities() {
-        if (this.processId) {
-          fetch(`${this.url}/activities/${this.processId}`)
-            .then(response => response.json())
-            .then(myJson => this.activities = myJson);
-        } else {
-          fetch(`${this.url}/activities`)
-            .then(response => response.json())
-            .then(myJson => this.activities = myJson);
+      update(newVal, oldVal) {
+        let overlays = this.bpmnViewer.get('overlays');
+        if (oldVal) {
+          oldVal.activities.forEach(e => {
+            overlays.remove({element: e.id});
+          });
+        }
+        if (newVal) {
+          newVal.activities.forEach(e => {
+            var instances = '', canceled = '', finished = '';
+            if (e.instances > 0) instances = `<span class="badge badge-pill badge-success">${e.instances}</span>`;
+            if (e.canceled > 0) canceled = `<span class="badge badge-pill badge-warning">${e.canceled}</span>`;
+            if (e.finished > 0) finished = `<span class="badge badge-pill badge-info">${e.finished}</span>`;
+            overlays.add(e.id, {
+              position: {
+                top: -5,
+                left: 15,
+              },
+              html: `<div class="d-flex p-2 bd-highlight">${instances}${canceled}${finished}</div>`
+            });
+          });
         }
       }
-    }
+    },
+    computed: mapState(['data']),
   }
 </script>
 
@@ -103,11 +96,5 @@
 <style lang="scss">
   .container {
     height: 40vh;
-  }
-
-  .success-message {
-    color: green;
-    text-shadow: darkgreen;
-    background-color: #DCFECC;
   }
 </style>
