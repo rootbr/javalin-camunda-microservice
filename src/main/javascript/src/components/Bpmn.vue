@@ -75,8 +75,8 @@
           newVal.activities.forEach(e => {
             var instances = '', canceled = '', finished = '';
             if (e.instances > 0) instances = `<span class="badge badge-pill badge-success">${e.instances}</span>`;
-            if (e.canceled > 0) canceled = `<span class="badge badge-pill badge-warning">${e.canceled}</span>`;
-            if (e.finished > 0) finished = `<span class="badge badge-pill badge-info">${e.finished}</span>`;
+            if (e.canceled > 0) canceled = `<span class="badge badge-pill badge-danger">${e.canceled}</span>`;
+            if (e.finished > 0) finished = `<span class="badge badge-pill badge-dark">${e.finished}</span>`;
             overlays.add(e.id, {
               position: {
                 top: -5,
@@ -95,6 +95,6 @@
 
 <style lang="scss">
   .container {
-    height: 40vh;
+    height: 50vh;
   }
 </style>
