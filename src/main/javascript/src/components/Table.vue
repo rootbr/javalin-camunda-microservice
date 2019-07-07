@@ -66,10 +66,11 @@
     methods: {
       onBack() {
         this.selectedProcessId = null;
+        this.$socket.sendObj({selectedProcessId: this.selectedProcessId})
       },
       onSelectRow(event) {
         this.selectedProcessId = event.selected_item.id;
-        this.$socket.sendObj({awesome: 'data'})
+        this.$socket.sendObj({selectedProcessId: this.selectedProcessId})
       },
       pollingData() {
         this.$store.dispatch('fetchData');
