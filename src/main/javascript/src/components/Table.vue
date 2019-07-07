@@ -69,6 +69,7 @@
       },
       onSelectRow(event) {
         this.selectedProcessId = event.selected_item.id;
+        this.$socket.sendObj({awesome: 'data'})
       },
       pollingData() {
         this.$store.dispatch('fetchData');

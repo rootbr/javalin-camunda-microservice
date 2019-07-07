@@ -2,6 +2,7 @@ package org.rootbr
 
 import io.javalin.Javalin
 import io.javalin.apibuilder.ApiBuilder.*
+import io.javalin.websocket.WsContext
 import org.camunda.bpm.BpmPlatform
 import org.camunda.bpm.container.RuntimeContainerDelegate
 import org.camunda.bpm.engine.ProcessEngineConfiguration
@@ -66,4 +67,18 @@ fun main(args: Array<String>) {
                 }
             }
         }
+        .ws("/events/:process-id") { ws ->
+            ws.onConnect { ctx ->
+                log.info("success connect {}", ctx.processId)
+                ctx.send(ctx.processId)
+            }
+            ws.onMessage { ctx ->
+                log.info("receive message {}", ctx.message())
+            }
+            ws.onClose { ctx ->
+                log.info("success disconnect {}", ctx.processId)
+            }
+        }
 }
+
+val WsContext.processId: String get() = this.pathParam("process-id")

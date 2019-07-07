@@ -1,4 +1,4 @@
-POST http://localhost:8080/api/message/START?businessKey=2
+POST http://localhost:8080/api/message/START?businessKey=7
 Content-Type: application/json
 
 {"var":"val"}
@@ -8,12 +8,17 @@ Content-Type: application/json
 
 {"var2":"val2"}
 ###
-POST http://localhost:8080/api/message/NEXT?businessKey=1
+POST http://localhost:8080/api/message/NEXT?businessKey=7
 Content-Type: application/json
 
 {"var3":"val3"}
 ###
-POST http://localhost:8080/api/message/UPDATE?businessKey=2
+POST http://localhost:8080/api/message/UPDATE?businessKey=5
+Content-Type: application/json
+
+{"var3":"val3"}
+###
+POST http://localhost:8080/api/message/BACK?businessKey=5
 Content-Type: application/json
 
 {"var3":"val3"}
