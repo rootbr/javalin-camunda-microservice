@@ -24,7 +24,6 @@
 
 <script>
   import VueBootstrap4Table from 'vue-bootstrap4-table';
-  import {mapState} from 'vuex';
 
   export default {
     name: 'Table',
@@ -79,8 +78,9 @@
         }, 350)
       },
       update(data) {
-        this.columns = data.columns;
-        this.rows = data.rows;
+        let parse = JSON.parse(data);
+        this.columns = parse.columns;
+        this.rows = parse.rows;
       }
     },
     watch: {
@@ -88,11 +88,7 @@
         this.config.rows_selectable = !val;
         this.$store.dispatch('changeProcessId', val);
       },
-      data(val) {
-        if (val != null) this.update(val)
-      },
     },
-    computed: mapState(['data']),
     components: {
       VueBootstrap4Table,
     },
@@ -100,6 +96,7 @@
       clearInterval(this.polling)
     },
     created() {
+      this.$options.sockets.onmessage = (message) => this.update(message.data);
       this.pollingData();
     },
   };

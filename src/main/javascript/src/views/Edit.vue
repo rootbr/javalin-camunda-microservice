@@ -1,6 +1,6 @@
 <template>
   <div class="Edit">
-    Will edit BPMN scheme
+    not realized yet
   </div>
 </template>
 
