@@ -71,12 +71,6 @@
         this.selectedProcessId = event.selected_item.id;
         this.$socket.sendObj({selectedProcessId: this.selectedProcessId})
       },
-      pollingData() {
-        this.$store.dispatch('fetchData');
-        this.polling = setInterval(() => {
-          this.$store.dispatch('fetchData');
-        }, 350)
-      },
       update(data) {
         let parse = JSON.parse(data);
         this.columns = parse.columns;
@@ -92,12 +86,8 @@
     components: {
       VueBootstrap4Table,
     },
-    beforeDestroy() {
-      clearInterval(this.polling)
-    },
     created() {
       this.$options.sockets.onmessage = (message) => this.update(message.data);
-      this.pollingData();
     },
   };
 </script>

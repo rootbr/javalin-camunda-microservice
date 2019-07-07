@@ -74,6 +74,7 @@ fun main() {
             ws.onMessage { ctx ->
                 val prop = JSON(ctx.message()).prop("selectedProcessId")
                 val process = if(prop.isNull) "all" else prop.stringValue()
+                processMap.put(ctx, process)
                 logMain.info("choose process {}", process)
                 broadcastMessage(process)
             }
