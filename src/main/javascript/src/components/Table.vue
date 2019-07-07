@@ -57,7 +57,7 @@
             placeholder: "search text",
             visibility: true,
             case_sensitive: false,
-            showClearButton: false,
+            showClearButton: true,
           },
           server_mode: false,
         },

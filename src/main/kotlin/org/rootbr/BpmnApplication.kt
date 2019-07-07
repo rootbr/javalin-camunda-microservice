@@ -55,18 +55,6 @@ fun main(args: Array<String>) {
                         get(ApiCamunda::stateProcess)
                     }
                 }
-                path("/activities") {
-                    get(ApiCamunda::activities)
-                    path("/:processId") {
-                        get(ApiCamunda::activitiesProcess)
-                    }
-                }
-                path("/variables/:processId") {
-                    get(ApiCamunda::variables)
-                }
-                path("/processes") {
-                    get(ApiCamunda::processes)
-                }
                 path("/process") {
                     get(ApiCamunda::process)
                     path("/deployment/create") {

@@ -8,28 +8,21 @@ import org.slf4j.LoggerFactory
 
 object ApiCamunda {
     val log = LoggerFactory.getLogger(ApiCamunda.javaClass)
-    val taskService = BpmPlatform.getDefaultProcessEngine().taskService
     val repositoryService = BpmPlatform.getDefaultProcessEngine().repositoryService
     val runtimeService = BpmPlatform.getDefaultProcessEngine().runtimeService
     val historyService = BpmPlatform.getDefaultProcessEngine().historyService
 
-    fun activities(ctx: Context) {
-        ctx.json(taskService.createTaskQuery().list().groupingBy { it.taskDefinitionKey }.eachCount())
-    }
-
     fun state(ctx: Context) {
-        val activities =
-            historyService.createHistoricActivityStatisticsQuery(processDefinition().id).includeFinished()
-                .includeCanceled().list()
+        val activities = historicActivities()
         val processes = runtimeService.createProcessInstanceQuery().list().map {
             ProcessInstanceDto(
                 it.processInstanceId,
                 it.businessKey
             )
         }
-        val columns = mutableListOf<Column>()
-        columns.add(Column("id", "id", true))
-        columns.add(Column("businessKey", "businessKey"))
+        val columns = mutableListOf<ColumnDto>()
+        columns.add(ColumnDto("id", "id", true))
+        columns.add(ColumnDto("businessKey", "businessKey"))
         ctx.json(
             mapOf(
                 "activities" to activities,
@@ -39,49 +32,44 @@ object ApiCamunda {
         )
     }
 
-    fun stateProcess(ctx: Context) {
-        val processId = ctx.pathParam("processId")
-        val activites = historyService
-            .createHistoricActivityInstanceQuery().processInstanceId(processId).list()
+    private fun historicActivities(processId: String? = null): List<HistoricActivitiesStatDto> {
+        val query = historyService.createHistoricActivityInstanceQuery()
+        if (!processId.isNullOrEmpty()) query.processInstanceId(processId)
+        return query.list()
             .groupBy { it.activityId }
             .mapValues {
                 it.value.groupingBy {
-                    if (it.removalTime != null) Scope.CANCELED
+                    if (it.isCanceled) Scope.CANCELED
                     else if (it.endTime != null) Scope.FINISHED
                     else Scope.ACTIVE
                 }.eachCount()
             }
-            .map { HistoricActivities(it.key,
-                it.value[Scope.ACTIVE] ?: 0,
-                it.value[Scope.FINISHED] ?: 0,
-                it.value[Scope.CANCELED] ?: 0
-            ) }
+            .map {
+                HistoricActivitiesStatDto(
+                    it.key,
+                    it.value[Scope.ACTIVE] ?: 0,
+                    it.value[Scope.FINISHED] ?: 0,
+                    it.value[Scope.CANCELED] ?: 0
+                )
+            }
             .toList()
+    }
+
+    fun stateProcess(ctx: Context) {
+        val processId = ctx.pathParam("processId")
+        val activities = historicActivities(processId)
         val variables = runtimeService.getVariables(processId)
             .map { VariablesDto(it.key, (it.value as SpinJsonNode).unwrap()) }
             .toList()
-        val columns = mutableListOf<Column>()
-        columns.add(Column("variable", "id", true))
-        columns.add(Column("value", "value"))
+        val columns = mutableListOf<ColumnDto>()
+        columns.add(ColumnDto("variable", "id", true))
+        columns.add(ColumnDto("value", "value"))
         ctx.json(
             mapOf(
-                "activities" to activites,
+                "activities" to activities,
                 "rows" to variables,
                 "columns" to columns
             )
-        )
-    }
-
-    fun activitiesProcess(ctx: Context) {
-        val processId = ctx.pathParam(":processId")
-        ctx.json(runtimeService.getActiveActivityIds(processId).groupingBy { it }.eachCount())
-    }
-
-    fun variables(ctx: Context) {
-        ctx.json(
-            runtimeService.getVariables(ctx.pathParam(":processId"))
-                .map { VariablesDto(it.key, (it.value as SpinJsonNode).unwrap()) }
-                .toList()
         )
     }
 
@@ -126,8 +114,8 @@ object ApiCamunda {
 
 data class ProcessInstanceDto(val id: String, val businessKey: String?)
 data class VariablesDto(val id: String, val value: Any?)
-data class Column(val label: String, val name: String, val uniqueId: Boolean = false, val sort: Boolean = true)
-data class HistoricActivities(
+data class ColumnDto(val label: String, val name: String, val uniqueId: Boolean = false, val sort: Boolean = true)
+data class HistoricActivitiesStatDto(
     val id: String,
     val instances: Int = 0,
     val finished: Int = 0,
