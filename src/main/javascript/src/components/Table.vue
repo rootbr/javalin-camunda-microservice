@@ -24,6 +24,7 @@
 
 <script>
   import VueBootstrap4Table from 'vue-bootstrap4-table';
+  import { mapState } from 'vuex';
 
   export default {
     name: 'Table',
@@ -71,7 +72,6 @@
         this.$socket.sendObj({ selectedProcessId: this.selectedProcessId });
       },
       update(data) {
-        console.log(JSON.stringify(data));
         const parse = JSON.parse(data);
         this.columns = parse.columns;
         this.rows = parse.rows;
@@ -88,6 +88,11 @@
     created() {
       this.$options.sockets.onmessage = message => this.update(message.data);
     },
+    mounted() {
+      this.columns = this.data.columns;
+      this.rows = this.data.rows;
+    },
+    computed: mapState(['data']),
   };
 </script>
 

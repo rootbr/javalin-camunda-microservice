@@ -1,8 +1,6 @@
 <template>
   <div>
-    <Bpmn
-      :url="url"
-    />
+    <Bpmn />
     <Table />
   </div>
 </template>
@@ -19,7 +17,6 @@
     },
     data() {
       return {
-        url: 'http://localhost:8080/api',
       };
     },
     methods: {

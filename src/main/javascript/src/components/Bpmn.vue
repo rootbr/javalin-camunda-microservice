@@ -11,14 +11,9 @@
 
   export default {
     name: 'Bpmn',
-    props: {
-      url: {
-        type: String,
-        required: true,
-      },
-    },
     data() {
       return {
+        url: 'http://localhost:8080/api',
         readyImportDoneBpmn: false,
         diagramXML: null,
         activities: null,

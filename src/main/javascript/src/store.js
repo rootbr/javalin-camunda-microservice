@@ -16,10 +16,10 @@ export default new Vuex.Store({
   },
   mutations: {
     updateProcessId(state, processId) {
-      Vue.set(state, 'processId', processId);
+      state.socket.processId = processId;
     },
     updateData(state, data) {
-      Vue.set(state, 'data', data);
+      state.socket.data = data;
     },
     SOCKET_ONOPEN(state, event) {
       Vue.prototype.$socket = event.currentTarget;
