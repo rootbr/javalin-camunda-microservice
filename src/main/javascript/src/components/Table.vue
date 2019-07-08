@@ -29,21 +29,20 @@
     name: 'Table',
     data() {
       return {
-        polling: null,
         selectedProcessId: null,
         rows: [],
         columns: [],
         classes: {
           table: {
-            "table table-sm": true,
+            'table table-sm': true,
           },
         },
         actions: [
           {
-            btn_text: "back",
-            event_name: "on-back",
-            class: "btn btn-danger",
-          }
+            btn_text: 'back',
+            event_name: 'on-back',
+            class: 'btn btn-danger',
+          },
         ],
         config: {
           card_mode: false,
@@ -53,7 +52,7 @@
           pagination_info: false,
           rows_selectable: true,
           global_search: {
-            placeholder: "search text",
+            placeholder: 'search text',
             visibility: true,
             case_sensitive: false,
             showClearButton: true,
@@ -65,34 +64,34 @@
     methods: {
       onBack() {
         this.selectedProcessId = null;
-        this.$socket.sendObj({selectedProcessId: this.selectedProcessId})
+        this.$socket.sendObj({ selectedProcessId: this.selectedProcessId });
       },
       onSelectRow(event) {
         this.selectedProcessId = event.selected_item.id;
-        this.$socket.sendObj({selectedProcessId: this.selectedProcessId})
+        this.$socket.sendObj({ selectedProcessId: this.selectedProcessId });
       },
       update(data) {
-        let parse = JSON.parse(data);
+        console.log(JSON.stringify(data));
+        const parse = JSON.parse(data);
         this.columns = parse.columns;
         this.rows = parse.rows;
-      }
+      },
     },
     watch: {
       selectedProcessId(val) {
         this.config.rows_selectable = !val;
-        this.$store.dispatch('changeProcessId', val);
       },
     },
     components: {
       VueBootstrap4Table,
     },
     created() {
-      this.$options.sockets.onmessage = (message) => this.update(message.data);
+      this.$options.sockets.onmessage = message => this.update(message.data);
     },
   };
 </script>
 
-<style lang="scss">
+<style lang='scss'>
   .my-slim {
     color: green;
     text-shadow: darkgreen;

@@ -1,13 +1,13 @@
 import Vue from 'vue';
+import VueNativeSock from 'vue-native-websocket';
 import App from './App.vue';
 import router from './router';
 import store from './store';
-import VueNativeSock from 'vue-native-websocket'
 
 Vue.config.productionTip = false;
 
 Vue.use(VueNativeSock, 'ws://localhost:8080/events', {
-  store: store,
+  store,
   format: 'json',
   reconnection: true,
   reconnectionAttempts: 5,
@@ -17,5 +17,5 @@ Vue.use(VueNativeSock, 'ws://localhost:8080/events', {
 new Vue({
   router,
   store,
-  render: h => h(App)
+  render: h => h(App),
 }).$mount('#app');

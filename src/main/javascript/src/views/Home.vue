@@ -2,18 +2,14 @@
   <div>
     <Bpmn
       :url="url"
-      :processId="processIdScheme"
     />
-    <Table
-      :url="url"
-      @onSelectRow='onSelectProcess'
-    />
+    <Table />
   </div>
 </template>
 
 <script>
-  import Bpmn from '@/components/Bpmn';
-  import Table from "@/components/Table";
+  import Bpmn from '@/components/Bpmn.vue';
+  import Table from '@/components/Table.vue';
 
   export default {
     name: 'Home',
@@ -24,13 +20,10 @@
     data() {
       return {
         url: 'http://localhost:8080/api',
-        processIdScheme: null,
       };
     },
     methods: {
-      onSelectProcess(s) {
-        this.processIdScheme = s
-      },
+
     },
   };
 </script>
