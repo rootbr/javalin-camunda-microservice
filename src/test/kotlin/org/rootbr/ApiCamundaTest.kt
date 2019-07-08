@@ -1,8 +1,13 @@
 package org.rootbr
 
+import khttp.post
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.async
+import org.json.JSONObject
 import org.junit.jupiter.api.Test
 
 class ApiCamundaTest {
+
     @Test
     fun test0() {
         val list = listOf(
@@ -20,8 +25,32 @@ class ApiCamundaTest {
 
         println()
     }
+    @Test
+    fun test1() {
+        post(
+            "http://localhost:8080/api/message/START",
+            params = mapOf("businessKey" to "3"),
+            headers = mapOf("Content-Type" to "application/json"),
+            data = JSONObject(mapOf("name" to "value"))
+        )
+        GlobalScope.async {
+            post(
+                "http://localhost:8080/api/message/UPDATE",
+                params = mapOf("businessKey" to "3"),
+                headers = mapOf("Content-Type" to "application/json"),
+                data = JSONObject(mapOf("name" to "value"))
+            )
+        }
+        GlobalScope.async {
+            post(
+                "http://localhost:8080/api/message/UPDATE",
+                params = mapOf("businessKey" to "3"),
+                headers = mapOf("Content-Type" to "application/json"),
+                data = JSONObject(mapOf("name" to "value"))
+            )
+        }
+
+    }
 }
 
 data class HistoryActivity(val activityId: String, val isCanceled: Boolean, val isComplete: Boolean)
-
-

@@ -1,13 +1,8 @@
 package org.rootbr
 
 import org.camunda.bpm.BpmPlatform
-import org.camunda.bpm.container.RuntimeContainerDelegate
-import org.camunda.bpm.engine.ProcessEngineConfiguration
-import org.camunda.bpm.engine.impl.cfg.StandaloneInMemProcessEngineConfiguration
-import org.camunda.bpm.engine.variable.Variables
 import org.camunda.spin.Spin
 import org.camunda.spin.json.SpinJsonNode
-import org.camunda.spin.plugin.impl.SpinProcessEnginePlugin
 import org.slf4j.LoggerFactory
 import java.io.InputStream
 

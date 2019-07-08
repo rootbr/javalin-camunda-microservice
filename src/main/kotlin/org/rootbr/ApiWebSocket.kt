@@ -6,11 +6,9 @@ import java.util.concurrent.ConcurrentHashMap
 
 val processMap = ConcurrentHashMap<WsContext, String>()
 
-val WsContext.processId: String get() = this.pathParam("process-id")
-
 fun broadcastMessage(processId: String = "all") = processMap
     .filter { it.key.session.isOpen }
-    .filter { it.value == processId }
+    .filter { it.value == processId || it.value == "all"}
     .forEach {
-        it.key.send(JSON(if (processId == "all") state() else state(processId)).unwrap())
+        it.key.send(JSON(if (it.value == "all") state() else state(processId)).unwrap())
     }

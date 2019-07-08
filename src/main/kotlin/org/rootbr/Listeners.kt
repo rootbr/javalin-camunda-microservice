@@ -4,13 +4,17 @@ import org.camunda.bpm.engine.delegate.DelegateExecution
 import org.camunda.bpm.engine.delegate.DelegateTask
 import org.camunda.bpm.engine.delegate.ExecutionListener
 import org.camunda.bpm.engine.delegate.TaskListener
+import org.camunda.bpm.engine.impl.cfg.TransactionState
+import org.camunda.bpm.engine.impl.context.Context
 import org.slf4j.LoggerFactory
 
 object AuditTaskListener : TaskListener {
     val log = LoggerFactory.getLogger(AuditTaskListener::class.java)
     override fun notify(task: DelegateTask) {
-        log.info("${task.eventName} ${task.taskDefinitionKey}")
-        broadcastMessage()
+        val processInstanceId = task.processInstanceId
+        Context.getCommandContext().transactionContext.addTransactionListener(TransactionState.COMMITTED) {
+            broadcastMessage(processInstanceId)
+        }
     }
 }
 
