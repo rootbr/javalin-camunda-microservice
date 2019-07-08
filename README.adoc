@@ -1,5 +1,5 @@
 = Camunda microservice rootbr
 
-_Kotlin, Javalin, Camunda, Custom Spin-Gson_
+_Kotlin, Javalin, Camunda_
 
 *fast, small, simple*
