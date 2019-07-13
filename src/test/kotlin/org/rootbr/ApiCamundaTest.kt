@@ -12,6 +12,14 @@ import java.security.SecureRandom
 
 class ApiCamundaTest {
     @Test
+    @DisplayName("execute launch three times in parallel with same businessKey and all process will be launched")
+    fun test0() = runBlocking {
+        val businessKey = SecureRandom().nextInt(10000).toString()
+
+        parallelExecute(businessKey, "START", repeat = 3)
+    }
+
+    @Test
     @DisplayName("execute update three times in parallel, but only one update will be success")
     fun test1() = runBlocking {
         val businessKey = SecureRandom().nextInt(10000).toString()
@@ -19,13 +27,6 @@ class ApiCamundaTest {
         parallelExecute(businessKey, "START")
 
         parallelExecute(businessKey, "UPDATE", repeat = 3)
-    }
-    @Test
-    @DisplayName("execute launch three times in parallel with same businessKey and all process will be launched")
-    fun test0() = runBlocking {
-        val businessKey = SecureRandom().nextInt(10000).toString()
-
-        parallelExecute(businessKey, "START", repeat = 3)
     }
 }
 
