@@ -32,7 +32,7 @@ fun main() {
                         defaultSerializationFormat = Variables.SerializationDataFormats.JSON.name
                         databaseSchemaUpdate = ProcessEngineConfiguration.DB_SCHEMA_UPDATE_TRUE
                         jdbcUrl =
-                            "jdbc:h2:tcp://localhost/~/tmp/h2dbs/camunda-h2-dbs/process-engine;MVCC=TRUE;DB_CLOSE_ON_EXIT=FALSE"
+                            "jdbc:h2:~/tmp/h2dbs/camunda-h2-dbs/process-engine;MVCC=TRUE;DB_CLOSE_ON_EXIT=FALSE"
                         isJobExecutorActivate = true
                     }.buildProcessEngine()
                 )
