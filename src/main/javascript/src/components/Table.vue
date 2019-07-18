@@ -23,77 +23,77 @@
 </template>
 
 <script>
-  import VueBootstrap4Table from 'vue-bootstrap4-table';
-  import { mapState } from 'vuex';
+import VueBootstrap4Table from 'vue-bootstrap4-table';
+import { mapState } from 'vuex';
 
-  export default {
-    name: 'Table',
-    data() {
-      return {
-        selectedProcessId: null,
-        rows: [],
-        columns: [],
-        classes: {
-          table: {
-            'table table-sm': true,
-          },
+export default {
+  name: 'Table',
+  data() {
+    return {
+      selectedProcessId: null,
+      rows: [],
+      columns: [],
+      classes: {
+        table: {
+          'table table-sm': true,
         },
-        actions: [
-          {
-            btn_text: 'back',
-            event_name: 'on-back',
-            class: 'btn btn-danger',
-          },
-        ],
-        config: {
-          card_mode: false,
-          show_refresh_button: false,
-          show_reset_button: false,
-          pagination: false,
-          pagination_info: false,
-          rows_selectable: true,
-          global_search: {
-            placeholder: 'search text',
-            visibility: true,
-            case_sensitive: false,
-            showClearButton: true,
-          },
-          server_mode: false,
+      },
+      actions: [
+        {
+          btn_text: 'back',
+          event_name: 'on-back',
+          class: 'btn btn-danger',
         },
-      };
-    },
-    methods: {
-      onBack() {
-        this.selectedProcessId = null;
-        this.$socket.sendObj({ selectedProcessId: this.selectedProcessId });
+      ],
+      config: {
+        card_mode: false,
+        show_refresh_button: false,
+        show_reset_button: false,
+        pagination: false,
+        pagination_info: false,
+        rows_selectable: true,
+        global_search: {
+          placeholder: 'search text',
+          visibility: true,
+          case_sensitive: false,
+          showClearButton: true,
+        },
+        server_mode: false,
       },
-      onSelectRow(event) {
-        this.selectedProcessId = event.selected_item.id;
-        this.$socket.sendObj({ selectedProcessId: this.selectedProcessId });
-      },
-      update(data) {
-        const parse = JSON.parse(data);
-        this.columns = parse.columns;
-        this.rows = parse.rows;
-      },
+    };
+  },
+  methods: {
+    onBack() {
+      this.selectedProcessId = null;
+      this.$socket.sendObj({ selectedProcessId: this.selectedProcessId });
     },
-    watch: {
-      selectedProcessId(val) {
-        this.config.rows_selectable = !val;
-      },
+    onSelectRow(event) {
+      this.selectedProcessId = event.selected_item.id;
+      this.$socket.sendObj({ selectedProcessId: this.selectedProcessId });
     },
-    components: {
-      VueBootstrap4Table,
+    update(data) {
+      const parse = JSON.parse(data);
+      this.columns = parse.columns;
+      this.rows = parse.rows;
     },
-    created() {
-      this.$options.sockets.onmessage = message => this.update(message.data);
+  },
+  watch: {
+    selectedProcessId(val) {
+      this.config.rows_selectable = !val;
     },
-    mounted() {
-      this.columns = this.data.columns;
-      this.rows = this.data.rows;
-    },
-    computed: mapState(['data']),
-  };
+  },
+  components: {
+    VueBootstrap4Table,
+  },
+  created() {
+    this.$options.sockets.onmessage = message => this.update(message.data);
+  },
+  mounted() {
+    this.columns = this.data.columns;
+    this.rows = this.data.rows;
+  },
+  computed: mapState(['data']),
+};
 </script>
 
 <style lang='scss'>
