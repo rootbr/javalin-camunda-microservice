@@ -13,24 +13,28 @@ import org.camunda.bpm.engine.impl.pvm.process.ScopeImpl
 import org.camunda.bpm.engine.impl.util.xml.Element
 import java.util.*
 
-object UserTaskParseListenerPlugin : AbstractProcessEnginePlugin() {
+object AuditParseListenerPlugin : AbstractProcessEnginePlugin() {
     override fun preInit(processEngineConfiguration: ProcessEngineConfigurationImpl) {
         var preParseListeners: MutableList<BpmnParseListener>? = processEngineConfiguration.customPreBPMNParseListeners
         if (preParseListeners == null) {
             preParseListeners = ArrayList()
             processEngineConfiguration.customPreBPMNParseListeners = preParseListeners
         }
-        preParseListeners.add(UserTaskParseListener)
+        preParseListeners.add(AuditParseListener)
     }
 }
 
-object UserTaskParseListener : AbstractBpmnParseListener() {
+object AuditParseListener : AbstractBpmnParseListener() {
     override fun parseProcess(processElement: Element?, processDefinition: ProcessDefinitionEntity) {
         processDefinition.addListener(
             ExecutionListener.EVENTNAME_START,
             UniquenessBusinessKeyProcessStartEventListener
         )
     }
+
+//    override fun parseEndEvent(endEventElement: Element?, scope: ScopeImpl?, activity: ActivityImpl?) {
+//        activity!!.addExecutionListener(ExecutionListener.EVENTNAME_END, AuditExecutionListener)
+//    }
 
     override fun parseUserTask(userTaskElement: Element?, scope: ScopeImpl?, activity: ActivityImpl) {
         val activityBehavior = activity.activityBehavior

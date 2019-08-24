@@ -28,11 +28,12 @@ fun main() {
                     (ProcessEngineConfiguration.createStandaloneInMemProcessEngineConfiguration()
                             as StandaloneInMemProcessEngineConfiguration).apply {
                         processEnginePlugins.add(SpinProcessEnginePlugin())
-                        processEnginePlugins.add(UserTaskParseListenerPlugin)
+                        processEnginePlugins.add(AuditParseListenerPlugin)
                         defaultSerializationFormat = Variables.SerializationDataFormats.JSON.name
                         databaseSchemaUpdate = ProcessEngineConfiguration.DB_SCHEMA_UPDATE_TRUE
+                        historyEventHandler = AuditDbHistoryEventHandler()
                         jdbcUrl =
-                            "jdbc:h2:~/tmp/h2dbs/camunda-h2-dbs/process-engine;MVCC=TRUE;DB_CLOSE_ON_EXIT=FALSE"
+                            "jdbc:h2:mem:process-engine;MVCC=TRUE;DB_CLOSE_ON_EXIT=FALSE"
                         isJobExecutorActivate = true
                     }.buildProcessEngine()
                 )
@@ -73,7 +74,7 @@ fun main() {
             }
             ws.onMessage { ctx ->
                 val prop = JSON(ctx.message()).prop("selectedProcessId")
-                val process = if(prop.isNull) "all" else prop.stringValue()
+                val process = if (prop.isNull) "all" else prop.stringValue()
                 processMap.put(ctx, process)
                 logMain.info("choose process {}", process)
                 broadcastMessage(process)

@@ -8,10 +8,19 @@ import org.camunda.bpm.engine.impl.cfg.TransactionState
 import org.camunda.bpm.engine.impl.context.Context
 import org.slf4j.LoggerFactory
 
+val log = LoggerFactory.getLogger("Listener")
+
 object AuditTaskListener : TaskListener {
-    val log = LoggerFactory.getLogger(AuditTaskListener::class.java)
     override fun notify(task: DelegateTask) {
         val processInstanceId = task.processInstanceId
+        Context.getCommandContext().transactionContext.addTransactionListener(TransactionState.COMMITTED) {
+            broadcastMessage(processInstanceId)
+        }
+    }
+}
+object AuditExecutionListener : ExecutionListener {
+    override fun notify(execution: DelegateExecution) {
+        val processInstanceId = execution.processInstanceId
         Context.getCommandContext().transactionContext.addTransactionListener(TransactionState.COMMITTED) {
             broadcastMessage(processInstanceId)
         }
