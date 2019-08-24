@@ -77,7 +77,7 @@ fun deploy(filename: String, content: InputStream) = repositoryService.createDep
 fun correlateMessage(messageName: String, businessKey: String?, body: String?) = runtimeService
     .createMessageCorrelation(messageName).apply {
         businessKey?.let { this.processInstanceBusinessKey(it) }
-        body?.let {
+        if (!body.isNullOrEmpty()) {
             val json = Spin.JSON(body)
             if (!json.isNull) setVariable(messageName, json)
         }
