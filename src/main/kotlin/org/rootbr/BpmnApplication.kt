@@ -33,7 +33,7 @@ fun main() {
                         databaseSchemaUpdate = ProcessEngineConfiguration.DB_SCHEMA_UPDATE_TRUE
                         historyEventHandler = AuditDbHistoryEventHandler()
                         jdbcUrl =
-                            "jdbc:h2:mem:process-engine;MVCC=TRUE;DB_CLOSE_ON_EXIT=FALSE"
+                            "jdbc:h2:./process-engine;MVCC=TRUE;DB_CLOSE_ON_EXIT=FALSE"
                         isJobExecutorActivate = true
                     }.buildProcessEngine()
                 )

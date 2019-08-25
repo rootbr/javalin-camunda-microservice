@@ -41,7 +41,6 @@ dependencies {
     implementation("org.camunda.spin:camunda-spin-dataformat-json-jackson:1.6.7")
 
     testImplementation("khttp:khttp:1.0.0")
-    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.0-M2")
 
     testCompile("org.junit.jupiter:junit-jupiter-api:5.4.2")
     testCompile("org.junit.jupiter:junit-jupiter-params:5.4.2")

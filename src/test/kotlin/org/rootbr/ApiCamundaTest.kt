@@ -1,86 +1,85 @@
 package org.rootbr
 
 import khttp.post
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import org.json.JSONObject
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
-import java.security.SecureRandom
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 
 
+@DisplayName("запустить параллельно")
 class ApiCamundaTest {
     @Test
-    @DisplayName("execute launch three times in parallel with same businessKey and all process will be launched")
-    fun test0() = runBlocking {
-        val businessKey = SecureRandom().nextInt(10000).toString()
+    @DisplayName("1 - старт процесса с одинаковым ключом")
+    fun test0() {
+        val businessKey = "1"
 
-        parallelExecute(businessKey, "START", repeat = 3)
+        concurrentSendMessage(
+            businessKey = businessKey,
+            messageName = "START",
+            repeatTimes = Runtime.getRuntime().availableProcessors()
+        )
     }
 
     @Test
-    @DisplayName("execute update three times in parallel, but only one update will be success")
-    fun test1() = runBlocking {
-        val businessKey = SecureRandom().nextInt(10000).toString()
+    @DisplayName("2 - UPDATE формы")
+    fun test1() {
+        val businessKey = "2"
 
-        parallelExecute(businessKey, "START")
-
-        parallelExecute(businessKey, "UPDATE", repeat = 3)
-    }
-
-    @Test
-    @DisplayName("execute update sub process three times in parallel, but only one update will be success")
-    fun test2() {
-        val businessKey = "4"; //SecureRandom().nextInt(10000).toString()
-
-        post(
-            "http://localhost:8080/api/message/START",
-            params = mapOf("businessKey" to businessKey),
-            headers = mapOf("Content-Type" to "application/json")
+        concurrentSendMessage(
+            businessKey = businessKey,
+            messageName = "START"
         )
 
-        val readyThreadCounter = CountDownLatch(2)
-        val callingThreadBlocker = CountDownLatch(1)
-        val completedThreadCounter = CountDownLatch(2)
-        repeat(Runtime.getRuntime().availableProcessors()) {
-            WaitingWorker(
-                businessKey = businessKey,
-                messageName = "UPDATE_SUBPROCESS",
-                callingThreadBlocker = callingThreadBlocker,
-                completedThreadCounter = completedThreadCounter,
-                readyThreadCounter = readyThreadCounter,
-                variables = mapOf("v" to it)
-            ).start()
-        }
-        readyThreadCounter.await()
-        callingThreadBlocker.countDown()
-        completedThreadCounter.await(3L, TimeUnit.SECONDS)
+        concurrentSendMessage(
+            businessKey = businessKey,
+            messageName = "UPDATE",
+            repeatTimes = Runtime.getRuntime().availableProcessors()
+        )
+    }
+
+    @Test
+    @DisplayName("3 - старт подпроцессов")
+    fun test2() {
+        val businessKey = "3"
+
+        concurrentSendMessage(
+            businessKey = businessKey,
+            messageName = "START"
+        )
+
+        concurrentSendMessage(
+            businessKey = businessKey,
+            messageName = "UPDATE_SUBPROCESS",
+            needPayload = false,
+            repeatTimes = Runtime.getRuntime().availableProcessors()
+        )
     }
 }
 
-suspend fun parallelExecute(
+fun concurrentSendMessage(
     businessKey: String,
     messageName: String,
-    variables: Map<String, String?>? = null,
-    repeat: Int = 1
+    needPayload: Boolean = false,
+    repeatTimes: Int = 1
 ) {
-
-    coroutineScope {
-        repeat(repeat) {
-            launch(Dispatchers.Default) {
-                post(
-                    "http://localhost:8080/api/message/$messageName",
-                    params = mapOf("businessKey" to businessKey),
-                    headers = mapOf("Content-Type" to "application/json"),
-                    data = JSONObject(variables)
-                )
-            }
-        }
+    val readyThreadCounter = CountDownLatch(repeatTimes)
+    val callingThreadBlocker = CountDownLatch(1)
+    val completedThreadCounter = CountDownLatch(repeatTimes)
+    repeat(repeatTimes) {
+        WaitingWorker(
+            businessKey = businessKey,
+            messageName = messageName,
+            callingThreadBlocker = callingThreadBlocker,
+            completedThreadCounter = completedThreadCounter,
+            readyThreadCounter = readyThreadCounter,
+            variables = if (needPayload) mapOf("property" to it) else null
+        ).start()
     }
+    readyThreadCounter.await()
+    callingThreadBlocker.countDown()
+    completedThreadCounter.await(2L, TimeUnit.SECONDS)
 }
 
 class WaitingWorker(
@@ -99,8 +98,8 @@ class WaitingWorker(
             post(
                 "http://localhost:8080/api/message/$messageName",
                 params = mapOf("businessKey" to businessKey),
-                headers = mapOf("Content-Type" to "application/json"),
-                data = JSONObject(variables)
+                headers = if (variables != null) mapOf("Content-Type" to "application/json") else mapOf(),
+                data = if (variables != null) JSONObject(variables) else null
             )
         } catch (e: InterruptedException) {
             e.printStackTrace()
