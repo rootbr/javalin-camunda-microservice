@@ -11,7 +11,7 @@ import java.util.concurrent.TimeUnit
 @DisplayName("запустить параллельно")
 class ApiCamundaTest {
     @Test
-    @DisplayName("1 - старт процесса с одинаковым ключом")
+    @DisplayName("businessKey 1 - старт процесса с одинаковым ключом")
     fun test0() {
         val businessKey = "1"
 
@@ -23,7 +23,7 @@ class ApiCamundaTest {
     }
 
     @Test
-    @DisplayName("2 - UPDATE формы")
+    @DisplayName("businessKey 2 - UPDATE формы")
     fun test1() {
         val businessKey = "2"
 
@@ -40,7 +40,7 @@ class ApiCamundaTest {
     }
 
     @Test
-    @DisplayName("3 - старт подпроцессов")
+    @DisplayName("businessKey 3 - старт подпроцессов")
     fun test2() {
         val businessKey = "3"
 
