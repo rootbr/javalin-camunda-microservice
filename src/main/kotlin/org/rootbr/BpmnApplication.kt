@@ -4,7 +4,7 @@ import io.javalin.Javalin
 import io.javalin.apibuilder.ApiBuilder.*
 import org.camunda.bpm.container.RuntimeContainerDelegate
 import org.camunda.bpm.engine.ProcessEngineConfiguration
-import org.camunda.bpm.engine.impl.cfg.StandaloneInMemProcessEngineConfiguration
+import org.camunda.bpm.engine.impl.cfg.ProcessEngineConfigurationImpl
 import org.camunda.bpm.engine.impl.util.ReflectUtil
 import org.camunda.bpm.engine.variable.Variables
 import org.camunda.spin.Spin.JSON
@@ -25,15 +25,14 @@ fun main() {
         .events { event ->
             event.serverStarting {
                 RuntimeContainerDelegate.INSTANCE.get().registerProcessEngine(
-                    (ProcessEngineConfiguration.createStandaloneInMemProcessEngineConfiguration()
-                            as StandaloneInMemProcessEngineConfiguration).apply {
+                    (ProcessEngineConfiguration.createStandaloneProcessEngineConfiguration()
+                            as ProcessEngineConfigurationImpl).apply {
                         processEnginePlugins.add(SpinProcessEnginePlugin())
                         processEnginePlugins.add(AuditParseListenerPlugin)
                         defaultSerializationFormat = Variables.SerializationDataFormats.JSON.name
                         databaseSchemaUpdate = ProcessEngineConfiguration.DB_SCHEMA_UPDATE_TRUE
                         historyEventHandler = AuditDbHistoryEventHandler()
-                        jdbcUrl =
-                            "jdbc:h2:./process-engine;MVCC=TRUE;DB_CLOSE_ON_EXIT=FALSE"
+                        jdbcUrl = "jdbc:h2:./process-engine;MVCC=TRUE;DB_CLOSE_ON_EXIT=FALSE"
                         isJobExecutorActivate = true
                     }.buildProcessEngine()
                 )
