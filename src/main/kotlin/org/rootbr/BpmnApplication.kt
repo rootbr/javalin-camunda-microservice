@@ -32,7 +32,7 @@ fun main() {
                         defaultSerializationFormat = Variables.SerializationDataFormats.JSON.name
                         databaseSchemaUpdate = ProcessEngineConfiguration.DB_SCHEMA_UPDATE_TRUE
                         historyEventHandler = AuditDbHistoryEventHandler()
-                        jdbcUrl = "jdbc:h2:./process-engine;MVCC=TRUE;DB_CLOSE_ON_EXIT=FALSE"
+                        jdbcUrl = "jdbc:h2:mem:camunda"
                         isJobExecutorActivate = true
                     }.buildProcessEngine()
                 )
