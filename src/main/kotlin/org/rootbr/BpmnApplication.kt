@@ -29,9 +29,10 @@ fun main() {
                             as ProcessEngineConfigurationImpl).apply {
                         processEnginePlugins.add(SpinProcessEnginePlugin())
                         processEnginePlugins.add(AuditParseListenerPlugin)
+                        historyEventHandler = AuditDbHistoryEventHandler()
                         defaultSerializationFormat = Variables.SerializationDataFormats.JSON.name
                         databaseSchemaUpdate = ProcessEngineConfiguration.DB_SCHEMA_UPDATE_TRUE
-                        historyEventHandler = AuditDbHistoryEventHandler()
+                        transactionContextFactory = StandaloneTransactionContextFactory()
                         jdbcUrl = "jdbc:h2:mem:camunda"
                         isJobExecutorActivate = true
                     }.buildProcessEngine()
