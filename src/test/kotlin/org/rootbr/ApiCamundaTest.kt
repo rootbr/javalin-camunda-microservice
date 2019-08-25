@@ -12,7 +12,7 @@ import java.util.concurrent.TimeUnit
 class ApiCamundaTest {
     @Test
     @DisplayName("businessKey 1 - старт процесса с одинаковым ключом")
-    fun test0() {
+    fun test1() {
         val businessKey = "1"
 
         concurrentSendMessage(
@@ -24,7 +24,7 @@ class ApiCamundaTest {
 
     @Test
     @DisplayName("businessKey 2 - UPDATE формы")
-    fun test1() {
+    fun test2() {
         val businessKey = "2"
 
         concurrentSendMessage(
@@ -35,25 +35,63 @@ class ApiCamundaTest {
         concurrentSendMessage(
             businessKey = businessKey,
             messageName = "UPDATE",
-            repeatTimes = Runtime.getRuntime().availableProcessors()
+            repeatTimes = Runtime.getRuntime().availableProcessors(),
+            needPayload = true
         )
     }
 
     @Test
     @DisplayName("businessKey 3 - старт подпроцессов")
-    fun test2() {
+    fun test3() {
         val businessKey = "3"
 
         concurrentSendMessage(
-            businessKey = businessKey,
-            messageName = "START"
+            messageName = "START",
+            businessKey = businessKey
         )
 
         concurrentSendMessage(
             businessKey = businessKey,
             messageName = "UPDATE_SUBPROCESS",
-            needPayload = false,
-            repeatTimes = Runtime.getRuntime().availableProcessors()
+            repeatTimes = Runtime.getRuntime().availableProcessors(),
+            needPayload = true
+        )
+    }
+
+    @Test
+    @DisplayName("businessKey 4 - старт подпроцессов без переменных")
+    fun test4() {
+        val businessKey = "4"
+
+        concurrentSendMessage(
+            messageName = "START",
+            businessKey = businessKey
+        )
+
+        concurrentSendMessage(
+            businessKey = businessKey,
+            messageName = "UPDATE_SUBPROCESS",
+            repeatTimes = Runtime.getRuntime().availableProcessors(),
+            needPayload = false
+        )
+    }
+
+    @Test
+    @DisplayName("businessKey 5 - старт подпроцессов с повтором до успеха")
+    fun test5() {
+        val businessKey = "5"
+
+        concurrentSendMessage(
+            messageName = "START",
+            businessKey = businessKey
+        )
+
+        concurrentSendMessage(
+            businessKey = businessKey,
+            messageName = "UPDATE_SUBPROCESS",
+            repeatTimes = Runtime.getRuntime().availableProcessors(),
+            needPayload = true,
+            needRepeatUntilSuccess = true
         )
     }
 }
@@ -62,7 +100,8 @@ fun concurrentSendMessage(
     businessKey: String,
     messageName: String,
     needPayload: Boolean = false,
-    repeatTimes: Int = 1
+    repeatTimes: Int = 1,
+    needRepeatUntilSuccess: Boolean = false
 ) {
     val readyThreadCounter = CountDownLatch(repeatTimes)
     val callingThreadBlocker = CountDownLatch(1)
@@ -74,7 +113,8 @@ fun concurrentSendMessage(
             callingThreadBlocker = callingThreadBlocker,
             completedThreadCounter = completedThreadCounter,
             readyThreadCounter = readyThreadCounter,
-            variables = if (needPayload) mapOf("property" to it) else null
+            variables = if (needPayload) mapOf("property" to it) else null,
+            needRepeatUntilSuccess = needRepeatUntilSuccess
         ).start()
     }
     readyThreadCounter.await()
@@ -88,19 +128,23 @@ class WaitingWorker(
     private val readyThreadCounter: CountDownLatch,
     private val callingThreadBlocker: CountDownLatch,
     private val completedThreadCounter: CountDownLatch,
-    private val variables: Map<String, Any>? = null
+    private val variables: Map<String, Any>? = null,
+    private val needRepeatUntilSuccess: Boolean = false
 ) : Thread() {
 
     override fun run() {
         readyThreadCounter.countDown()
         try {
             callingThreadBlocker.await()
-            post(
-                "http://localhost:8080/api/message/$messageName",
-                params = mapOf("businessKey" to businessKey),
-                headers = if (variables != null) mapOf("Content-Type" to "application/json") else mapOf(),
-                data = if (variables != null) JSONObject(variables) else null
-            )
+            do {
+                val response = post(
+                    "http://localhost:8080/api/message/$messageName",
+                    params = mapOf("businessKey" to businessKey),
+                    headers = if (variables != null) mapOf("Content-Type" to "application/json") else mapOf(),
+                    data = if (variables != null) JSONObject(variables) else null
+                )
+            } while (needRepeatUntilSuccess && response.statusCode >= 300)
+
         } catch (e: InterruptedException) {
             e.printStackTrace()
         } finally {
