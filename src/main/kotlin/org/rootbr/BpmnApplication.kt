@@ -69,15 +69,15 @@ fun main() {
         .ws("/events") { ws ->
             ws.onConnect { ctx ->
                 logMain.info("success connect")
-                processMap.put(ctx, "all")
-                broadcastMessage()
+                processMap[ctx] = SUBSCRIBE_TO_ALL
+                updateState(ctx)
             }
             ws.onMessage { ctx ->
                 val prop = JSON(ctx.message()).prop("selectedProcessId")
-                val process = if (prop.isNull) "all" else prop.stringValue()
-                processMap.put(ctx, process)
+                val process = if (prop.isNull) SUBSCRIBE_TO_ALL else prop.stringValue()
+                processMap[ctx] = process
                 logMain.info("choose process {}", process)
-                broadcastMessage(process)
+                updateState(ctx)
             }
             ws.onClose { ctx ->
                 logMain.info("success disconnect")

@@ -1,6 +1,7 @@
 package org.rootbr
 
 import org.camunda.bpm.BpmPlatform
+import org.camunda.bpm.engine.OptimisticLockingException
 import org.camunda.spin.Spin
 import org.camunda.spin.json.SpinJsonNode
 import org.slf4j.LoggerFactory
@@ -81,7 +82,13 @@ fun correlateMessage(messageName: String, businessKey: String?, body: String?) =
             val json = Spin.JSON(body)
             if (!json.isNull) setVariable(messageName, json)
         }
-        correlateAll()
+        try {
+            correlateAll()
+        } catch (e: OptimisticLockingException) {
+            logCamunda.warn(e.message)
+        } catch (e: NotUniqueBusinessKeyException) {
+            logCamunda.warn(e.message)
+        }
     }
 
 data class ProcessInstanceDto(val id: String, val businessKey: String?)
