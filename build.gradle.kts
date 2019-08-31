@@ -26,7 +26,8 @@ tasks {
 
 dependencies {
     implementation("io.javalin:javalin:3.1.0")
-    implementation("org.slf4j:slf4j-simple:1.7.26")
+    implementation("ch.qos.logback:logback-classic:1.2.3")
+
 
     implementation(kotlin("stdlib-jdk8"))
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.9.9")
