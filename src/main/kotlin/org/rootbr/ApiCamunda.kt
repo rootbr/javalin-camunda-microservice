@@ -2,7 +2,6 @@ package org.rootbr
 
 import org.camunda.bpm.BpmPlatform
 import org.camunda.bpm.engine.OptimisticLockingException
-import org.camunda.spin.Spin
 import org.camunda.spin.Spin.JSON
 import org.camunda.spin.json.SpinJsonNode
 import org.slf4j.LoggerFactory
@@ -76,31 +75,105 @@ fun deploy(filename: String, content: InputStream) = repositoryService.createDep
     .deployWithResult()
     .deployedProcessDefinitions?.let { logCamunda.info("Deploy resource \"${it[0].key}\", version ${it[0].version}") }
 
+private fun messageEventReceived(messageName: String, processId: String, body: SpinJsonNode?) {
+    try {
+        if (body != null && !body.isNull) {
+            runtimeService.messageEventReceived(messageName, processId, mapOf(messageName to body))
+        } else {
+            runtimeService.messageEventReceived(messageName, processId)
+        }
+    } catch (e: OptimisticLockingException) {
+        logCamunda.warn(e.message)
+        broadcastWsMessage(
+            EventTypes.ERROR,
+            JSON("{}")
+                .prop("message", e.message)
+                .prop("type", "error"),
+            processId
+        )
+    } catch (e: NotUniqueBusinessKeyException) {
+        logCamunda.warn(e.message)
+        broadcastWsMessage(
+            EventTypes.ERROR,
+            JSON("{}")
+                .prop("message", e.message)
+                .prop("type", "error"),
+            processId
+        )
+    } catch (e: RuntimeException) {
+        broadcastWsMessage(
+            EventTypes.ERROR,
+            JSON("{}")
+                .prop("message", e.message)
+                .prop("type", "error"),
+            processId
+        )
+    }
+}
+
+private fun messageEventReceivedForStart(messageName: String, businessKey: String?, body: SpinJsonNode?) {
+    try {
+        if (body != null && !body.isNull) {
+            if (businessKey.isNullOrEmpty())
+                runtimeService.startProcessInstanceByMessage(messageName, mapOf(messageName to body))
+            else
+                runtimeService.startProcessInstanceByMessage(messageName, businessKey, mapOf(messageName to body))
+        } else {
+            if (businessKey.isNullOrEmpty())
+                runtimeService.startProcessInstanceByMessage(messageName)
+            else
+                runtimeService.startProcessInstanceByMessage(messageName, businessKey)
+        }
+    } catch (e: OptimisticLockingException) {
+        logCamunda.warn(e.message)
+        broadcastWsMessage(
+            EventTypes.ERROR,
+            JSON("{}")
+                .prop("message", e.message)
+                .prop("type", "error"),
+            SUBSCRIBE_TO_ALL
+        )
+    } catch (e: NotUniqueBusinessKeyException) {
+        logCamunda.warn(e.message)
+        broadcastWsMessage(
+            EventTypes.ERROR,
+            JSON("{}")
+                .prop("message", e.message)
+                .prop("type", "error"),
+            SUBSCRIBE_TO_ALL
+        )
+    } catch (e: RuntimeException) {
+        broadcastWsMessage(
+            EventTypes.ERROR,
+            JSON("{}")
+                .prop("message", e.message)
+                .prop("type", "error"),
+            SUBSCRIBE_TO_ALL
+        )
+    }
+}
+
 fun correlateMessage(messageName: String, businessKey: String?, body: String?) {
-    // TODO чтобы корректно кидать exception надо знать в какой процесс приземляется сообщение или стартует новый процесс...
-    runtimeService
-        .createMessageCorrelation(messageName).apply {
-            businessKey?.let { this.processInstanceBusinessKey(it) }
-            if (!body.isNullOrEmpty()) {
-                val json = Spin.JSON(body)
-                if (!json.isNull) setVariable(messageName, json)
-            }
-            try {
-                correlateAll()
-            } catch (e: OptimisticLockingException) {
-                logCamunda.warn(e.message)
-            } catch (e: NotUniqueBusinessKeyException) {
-                logCamunda.warn(e.message)
-            } catch (e: RuntimeException) {
-                broadcastWsMessage(
-                    EventTypes.ERROR,
-                    JSON("{}")
-                        .prop("message", e.message)
-                        .prop("type", "error"),
-                    runtimeService.createProcessInstanceQuery().processInstanceBusinessKey(businessKey).singleResult().processInstanceId
-                )
+    val json = if (!body.isNullOrEmpty()) JSON(body) else null
+
+    val list = runtimeService.createEventSubscriptionQuery()
+        .eventType("message")
+        .eventName(messageName)
+        .list()
+
+    if (list.isNotEmpty()) {
+        list.forEach {
+            if (it.processInstanceId == null) {
+                messageEventReceivedForStart(messageName, businessKey, json)
+            } else {
+                val processInstance =
+                    runtimeService.createProcessInstanceQuery().processInstanceId(it.processInstanceId).singleResult()
+                if (processInstance.businessKey == businessKey) {
+                    messageEventReceived(messageName, it.executionId, json)
+                }
             }
         }
+    }
 }
 
 data class ProcessInstanceDto(val id: String, val businessKey: String?)
