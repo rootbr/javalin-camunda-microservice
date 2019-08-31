@@ -1,5 +1,6 @@
 import Vue from 'vue';
 import VueNativeSock from 'vue-native-websocket';
+import Notifications from 'vue-notification';
 import App from './App.vue';
 import router from './router';
 import store from './store';
@@ -13,6 +14,8 @@ Vue.use(VueNativeSock, 'ws://localhost:8080/events', {
   reconnectionAttempts: 5,
   reconnectionDelay: 3000,
 });
+
+Vue.use(Notifications);
 
 new Vue({
   router,

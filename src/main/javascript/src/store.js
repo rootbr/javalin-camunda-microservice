@@ -33,6 +33,11 @@ export default new Vuex.Store({
     },
     SOCKET_ONMESSAGE(state, message) {
       state.socket.message = message;
+      Vue.notify({
+        group: 'events',
+        title: 'received message',
+        text: JSON.stringify(message),
+      });
       state.data = message;
     },
     SOCKET_RECONNECT(state, count) {
