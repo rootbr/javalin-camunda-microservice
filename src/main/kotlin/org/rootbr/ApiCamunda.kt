@@ -17,7 +17,7 @@ private val columnsProcess = listOf(ColumnDto("variable", "id", true), ColumnDto
 
 fun state(processId: String): Map<String, List<Any>> {
     val variables = runtimeService.getVariables(processId)
-        .map { VariablesDto(it.key, (it.value as SpinJsonNode).unwrap()) }
+        .map { VariablesDto(it.key, if (it.value == null) null else (it.value as SpinJsonNode).unwrap()) }
         .toList()
     return mapOf(
         "activities" to historicActivities(processId),
@@ -40,7 +40,8 @@ fun state(): Map<String, List<Any>> {
 fun historicActivities(processId: String? = null): List<HistoricActivitiesStatDto> {
     val query = historyService.createHistoricActivityInstanceQuery()
     if (!processId.isNullOrEmpty()) query.processInstanceId(processId)
-    return query.list()
+    val list = query.list()
+    return list
         .groupBy { it.activityId }
         .mapValues {
             it.value.groupingBy {
