@@ -73,8 +73,10 @@ export default {
     },
     update(data) {
       const parse = JSON.parse(data);
-      this.columns = parse.columns;
-      this.rows = parse.rows;
+      if (parse.type === 'ACTIVITY_INSTANCE_UPDATE') {
+        this.columns = parse.payload.columns;
+        this.rows = parse.payload.rows;
+      }
     },
   },
   watch: {

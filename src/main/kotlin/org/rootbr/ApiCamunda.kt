@@ -3,6 +3,7 @@ package org.rootbr
 import org.camunda.bpm.BpmPlatform
 import org.camunda.bpm.engine.OptimisticLockingException
 import org.camunda.spin.Spin
+import org.camunda.spin.Spin.JSON
 import org.camunda.spin.json.SpinJsonNode
 import org.slf4j.LoggerFactory
 import java.io.InputStream
@@ -75,21 +76,32 @@ fun deploy(filename: String, content: InputStream) = repositoryService.createDep
     .deployWithResult()
     .deployedProcessDefinitions?.let { logCamunda.info("Deploy resource \"${it[0].key}\", version ${it[0].version}") }
 
-fun correlateMessage(messageName: String, businessKey: String?, body: String?) = runtimeService
-    .createMessageCorrelation(messageName).apply {
-        businessKey?.let { this.processInstanceBusinessKey(it) }
-        if (!body.isNullOrEmpty()) {
-            val json = Spin.JSON(body)
-            if (!json.isNull) setVariable(messageName, json)
+fun correlateMessage(messageName: String, businessKey: String?, body: String?) {
+    // TODO чтобы корректно кидать exception надо знать в какой процесс приземляется сообщение или стартует новый процесс...
+    runtimeService
+        .createMessageCorrelation(messageName).apply {
+            businessKey?.let { this.processInstanceBusinessKey(it) }
+            if (!body.isNullOrEmpty()) {
+                val json = Spin.JSON(body)
+                if (!json.isNull) setVariable(messageName, json)
+            }
+            try {
+                correlateAll()
+            } catch (e: OptimisticLockingException) {
+                logCamunda.warn(e.message)
+            } catch (e: NotUniqueBusinessKeyException) {
+                logCamunda.warn(e.message)
+            } catch (e: RuntimeException) {
+                broadcastWsMessage(
+                    EventTypes.ERROR,
+                    JSON("{}")
+                        .prop("message", e.message)
+                        .prop("type", "error"),
+                    runtimeService.createProcessInstanceQuery().processInstanceBusinessKey(businessKey).singleResult().processInstanceId
+                )
+            }
         }
-        try {
-            correlateAll()
-        } catch (e: OptimisticLockingException) {
-            logCamunda.warn(e.message)
-        } catch (e: NotUniqueBusinessKeyException) {
-            logCamunda.warn(e.message)
-        }
-    }
+}
 
 data class ProcessInstanceDto(val id: String, val businessKey: String?)
 data class VariablesDto(val id: String, val value: Any?)

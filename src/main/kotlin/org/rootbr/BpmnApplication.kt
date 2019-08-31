@@ -60,10 +60,12 @@ fun main() {
                 }
                 path("/message/:messageName") {
                     post {
-                        correlateMessage(it.pathParam(":messageName"), it.queryParam("businessKey"), it.body())
                         it.status(204)
                     }
                 }
+            }
+            after("/api/message/:messageName") {
+                correlateMessage(it.pathParam(":messageName"), it.queryParam("businessKey"), it.body())
             }
         }
         .ws("/events") { ws ->

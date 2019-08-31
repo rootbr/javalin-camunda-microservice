@@ -15,6 +15,8 @@ import org.camunda.bpm.engine.impl.persistence.entity.ProcessDefinitionEntity
 import org.camunda.bpm.engine.impl.pvm.process.ActivityImpl
 import org.camunda.bpm.engine.impl.pvm.process.ScopeImpl
 import org.camunda.bpm.engine.impl.util.xml.Element
+import org.camunda.spin.Spin.JSON
+import org.rootbr.EventTypes.TASK_INSTANCE_UPDATE
 import org.slf4j.LoggerFactory
 import java.util.*
 
@@ -43,25 +45,32 @@ object AuditParseListener : AbstractBpmnParseListener() {
         val activityBehavior = activity.activityBehavior
         if (activityBehavior is UserTaskActivityBehavior) {
             activityBehavior.taskDefinition.apply {
-                addTaskListener(TaskListener.EVENTNAME_CREATE, AuditTaskListenerCreated)
-                addTaskListener(TaskListener.EVENTNAME_DELETE, AuditTaskListenerFinished)
-                addTaskListener(TaskListener.EVENTNAME_COMPLETE, AuditTaskListenerFinished)
+                addTaskListener(TaskListener.EVENTNAME_CREATE, AuditTaskListener)
+                addTaskListener(TaskListener.EVENTNAME_DELETE, AuditTaskListener)
+                addTaskListener(TaskListener.EVENTNAME_COMPLETE, AuditTaskListener)
             }
         }
     }
 }
 
-object AuditTaskListenerFinished : TaskListener {
+object AuditTaskListener : TaskListener {
     override fun notify(task: DelegateTask) {
         Context.getCommandContext().transactionContext.addTransactionListener(TransactionState.COMMITTED) {
-            logListeners.info("task \"{}\" was finished", task.name)
-        }
-    }
-}
-object AuditTaskListenerCreated : TaskListener {
-    override fun notify(task: DelegateTask) {
-        Context.getCommandContext().transactionContext.addTransactionListener(TransactionState.COMMITTED) {
-            logListeners.info("task \"{}\" was created", task.name)
+            val message = "${task.eventName} ${task.name} in process ${task.execution.processBusinessKey}"
+            broadcastWsMessage(
+                TASK_INSTANCE_UPDATE,
+                JSON("{}")
+                    .prop("message", message)
+                    .prop(
+                        "type", when (task.eventName) {
+                            "create" -> "success"
+                            "delete" -> "warn"
+                            "complete" -> "success"
+                            else -> null
+                        }
+                    ),
+                task.processInstanceId
+            )
         }
     }
 }

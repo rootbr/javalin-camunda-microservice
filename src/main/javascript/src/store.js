@@ -33,12 +33,18 @@ export default new Vuex.Store({
     },
     SOCKET_ONMESSAGE(state, message) {
       state.socket.message = message;
-      Vue.notify({
-        group: 'events',
-        title: 'received message',
-        text: JSON.stringify(message),
-      });
-      state.data = message;
+
+      if (message.type === 'ACTIVITY_INSTANCE_UPDATE') {
+        state.data = message.payload;
+      } else if (message.type === 'TASK_INSTANCE_UPDATE' || message.type === 'ERROR') {
+        Vue.notify({
+          group: 'events',
+          title: message.payload.message,
+          type: message.payload.type,
+          duration: 5000,
+          speed: 1000,
+        });
+      }
     },
     SOCKET_RECONNECT(state, count) {
       console.info(state, count);

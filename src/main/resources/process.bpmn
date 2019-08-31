@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="Definitions_13p9yun" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="3.1.2">
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:bioc="http://bpmn.io/schema/bpmn/biocolor/1.0" id="Definitions_13p9yun" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="3.1.2">
   <bpmn:message id="Message_0y80zre" name="CANCEL" />
   <bpmn:message id="Message_00ukx18" name="UPDATE" />
   <bpmn:message id="Message_0jt15cc" name="START" />
@@ -33,9 +33,6 @@
     <bpmn:userTask id="userTask_cancel" name="task cancel">
       <bpmn:incoming>SequenceFlow_1tdxcml</bpmn:incoming>
     </bpmn:userTask>
-    <bpmn:userTask id="userTask_repeat" name="task repeat">
-      <bpmn:incoming>SequenceFlow_1fx42b3</bpmn:incoming>
-    </bpmn:userTask>
     <bpmn:exclusiveGateway id="ExclusiveGateway_1ifnmf9" default="SequenceFlow_0paf38u">
       <bpmn:incoming>SequenceFlow_1q1xmrc</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_0paf38u</bpmn:outgoing>
@@ -43,10 +40,6 @@
     </bpmn:exclusiveGateway>
     <bpmn:boundaryEvent id="BoundaryEvent_0eg8mg5" name="NEXT" attachedToRef="userTask_cancel">
       <bpmn:outgoing>SequenceFlow_1pw0ieb</bpmn:outgoing>
-      <bpmn:messageEventDefinition messageRef="Message_07imuh1" />
-    </bpmn:boundaryEvent>
-    <bpmn:boundaryEvent id="BoundaryEvent_0bd7y8r" name="NEXT" attachedToRef="userTask_repeat">
-      <bpmn:outgoing>SequenceFlow_14emmes</bpmn:outgoing>
       <bpmn:messageEventDefinition messageRef="Message_07imuh1" />
     </bpmn:boundaryEvent>
     <bpmn:boundaryEvent id="BoundaryEvent_0xn0s80" name="NEXT" attachedToRef="userTask_2">
@@ -94,12 +87,29 @@
       </bpmn:endEvent>
       <bpmn:sequenceFlow id="SequenceFlow_0zi3utq" sourceRef="StartEvent_1lmcjdm" targetRef="EndEvent_0y3v71q" />
     </bpmn:subProcess>
+    <bpmn:userTask id="userTask_repeat" name="task repeat">
+      <bpmn:incoming>SequenceFlow_1fx42b3</bpmn:incoming>
+    </bpmn:userTask>
+    <bpmn:boundaryEvent id="BoundaryEvent_0bd7y8r" name="NEXT" attachedToRef="userTask_repeat">
+      <bpmn:outgoing>SequenceFlow_14emmes</bpmn:outgoing>
+      <bpmn:messageEventDefinition messageRef="Message_07imuh1" />
+    </bpmn:boundaryEvent>
+    <bpmn:boundaryEvent id="BoundaryEvent_13hvj4t" attachedToRef="userTask_1">
+      <bpmn:outgoing>SequenceFlow_0ryv2am</bpmn:outgoing>
+      <bpmn:messageEventDefinition messageRef="Message_0oxpqed" />
+    </bpmn:boundaryEvent>
+    <bpmn:sequenceFlow id="SequenceFlow_0ryv2am" sourceRef="BoundaryEvent_13hvj4t" targetRef="Task_0vf9ajf" />
+    <bpmn:scriptTask id="Task_0vf9ajf" name="error" scriptFormat="javascript">
+      <bpmn:incoming>SequenceFlow_0ryv2am</bpmn:incoming>
+      <bpmn:script>throw new java.lang.RuntimeException("Все плохо!");</bpmn:script>
+    </bpmn:scriptTask>
   </bpmn:process>
   <bpmn:message id="Message_1c1nkzu" name="UPDATE_SUBPROCESS" />
+  <bpmn:message id="Message_0oxpqed" name="ERROR" />
   <bpmndi:BPMNDiagram id="BPMNDiagram_1">
     <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Collaboration_1vh7e1y">
       <bpmndi:BPMNShape id="Participant_1k4za21_di" bpmnElement="Participant_1k4za21" isHorizontal="true">
-        <dc:Bounds x="129" y="81" width="660" height="510" />
+        <dc:Bounds x="129" y="81" width="660" height="489" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="EndEvent_0csi5fr_di" bpmnElement="success">
         <dc:Bounds x="730" y="201" width="36" height="36" />
@@ -194,6 +204,7 @@
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="SequenceFlow_14emmes_di" bpmnElement="SequenceFlow_14emmes">
         <di:waypoint x="583" y="404" />
+        <di:waypoint x="662" y="404" />
         <di:waypoint x="644" y="404" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="SequenceFlow_1pw0ieb_di" bpmnElement="SequenceFlow_1pw0ieb">
@@ -230,18 +241,29 @@
         <di:waypoint x="285" y="219" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="SubProcess_1hg00gt_di" bpmnElement="SubProcess_0o32evg" isExpanded="true">
-        <dc:Bounds x="238" y="451" width="153" height="120" />
+        <dc:Bounds x="172" y="430" width="153" height="120" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="StartEvent_1dlcd2w_di" bpmnElement="StartEvent_1lmcjdm">
-        <dc:Bounds x="257" y="491" width="36" height="36" />
+        <dc:Bounds x="191" y="470" width="36" height="36" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="EndEvent_0y3v71q_di" bpmnElement="EndEvent_0y3v71q">
-        <dc:Bounds x="337" y="491" width="36" height="36" />
+        <dc:Bounds x="271" y="470" width="36" height="36" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="SequenceFlow_0zi3utq_di" bpmnElement="SequenceFlow_0zi3utq">
-        <di:waypoint x="293" y="509" />
-        <di:waypoint x="337" y="509" />
+        <di:waypoint x="227" y="488" />
+        <di:waypoint x="271" y="488" />
       </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="BoundaryEvent_13875mn_di" bpmnElement="BoundaryEvent_13hvj4t">
+        <dc:Bounds x="308" y="241" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow_0ryv2am_di" bpmnElement="SequenceFlow_0ryv2am">
+        <di:waypoint x="326" y="277" />
+        <di:waypoint x="326" y="349" />
+        <di:waypoint x="360" y="349" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="ScriptTask_1buieqg_di" bpmnElement="Task_0vf9ajf" bioc:stroke="rgb(229, 57, 53)" bioc:fill="rgb(255, 205, 210)">
+        <dc:Bounds x="360" y="329" width="50" height="40" />
+      </bpmndi:BPMNShape>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>
 </bpmn:definitions>
