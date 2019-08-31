@@ -11,6 +11,7 @@
     "axios": "^0.19.0",
     "bpmn-js": "^4.0.0",
     "core-js": "^2.6.5",
+    "velocity-animate": "^1.5.2",
     "vue": "^2.6.10",
     "vue-bootstrap4-table": "^1.1.9",
     "vue-bpmn": "^0.2.0",
