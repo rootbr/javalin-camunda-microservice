@@ -12,7 +12,7 @@ POST http://localhost:8080/api/message/ERROR?businessKey=2
 Content-Type: application/json
 
 ###
-POST http://localhost:8080/api/message/NEXT_value
+POST http://localhost:8080/api/message/NEXT_1
 Content-Type: application/json
 
 ###
@@ -27,6 +27,11 @@ Content-Type: application/json
 {"var3":"val3"}
 ###
 POST http://localhost:8080/api/message/UPDATE_SUBPROCESS?businessKey=1
+Content-Type: application/json
+
+{"property":"value"}
+###
+POST http://localhost:8080/api/message/UPDATE_SUBPROCESS_2?businessKey=1
 Content-Type: application/json
 
 {"property":"value"}

@@ -2,6 +2,7 @@ package org.rootbr
 
 import khttp.post
 import org.json.JSONObject
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import java.util.concurrent.CountDownLatch
@@ -78,6 +79,7 @@ class ApiCamundaTest {
 
     @Test
     @DisplayName("businessKey 5 - старт подпроцессов с повтором до успеха")
+    @Disabled("т. к. асинхронное получение и мы не узнаем синхронно как прошла корреляция сообщения")
     fun test5() {
         val businessKey = "5"
 
@@ -89,6 +91,25 @@ class ApiCamundaTest {
         concurrentSendMessage(
             businessKey = businessKey,
             messageName = "UPDATE_SUBPROCESS",
+            repeatTimes = Runtime.getRuntime().availableProcessors(),
+            needPayload = true,
+            needRepeatUntilSuccess = true
+        )
+    }
+
+    @Test
+    @DisplayName("businessKey 6 - старт подпроцессов с сигналами")
+    fun test6() {
+        val businessKey = "61"
+
+        concurrentSendMessage(
+            messageName = "START",
+            businessKey = businessKey
+        )
+
+        concurrentSendMessage(
+            businessKey = businessKey,
+            messageName = "UPDATE_SUBPROCESS_2",
             repeatTimes = Runtime.getRuntime().availableProcessors(),
             needPayload = true,
             needRepeatUntilSuccess = true
