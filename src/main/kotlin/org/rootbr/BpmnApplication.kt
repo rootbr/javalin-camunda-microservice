@@ -35,6 +35,7 @@ fun main() {
                         transactionContextFactory = StandaloneTransactionContextFactory()
                         jdbcUrl = "jdbc:h2:mem:camunda"
                         isJobExecutorActivate = true
+                        jdbcMaxActiveConnections = 25
                     }.buildProcessEngine()
                 )
             }

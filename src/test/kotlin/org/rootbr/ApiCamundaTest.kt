@@ -100,7 +100,7 @@ class ApiCamundaTest {
     @Test
     @DisplayName("businessKey 6 - старт подпроцессов с сигналами")
     fun test6() {
-        val businessKey = "61"
+        val businessKey = "6"
 
         concurrentSendMessage(
             messageName = "START",
