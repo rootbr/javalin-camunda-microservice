@@ -1,8 +1,5 @@
 # front
 
-sudo apt install npm
-sudo npm install -g @vue/cli
-
 ## Project setup
 ```
 npm install

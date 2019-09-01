@@ -79,9 +79,8 @@ class ApiCamundaTest {
 
     @Test
     @DisplayName("businessKey 5 - старт подпроцессов с повтором до успеха")
-    @Disabled("т. к. асинхронное получение и мы не узнаем синхронно как прошла корреляция сообщения")
     fun test5() {
-        val businessKey = "5"
+        val businessKey = "51"
 
         concurrentSendMessage(
             messageName = "START",
@@ -162,7 +161,10 @@ class WaitingWorker(
                     "http://localhost:8080/api/message/$messageName",
                     params = mapOf("businessKey" to businessKey),
                     headers = if (variables != null) mapOf("Content-Type" to "application/json") else mapOf(),
-                    data = if (variables != null) JSONObject(variables) else null
+                    data = when {
+                        variables != null -> JSONObject(variables)
+                        else -> null
+                    }
                 )
             } while (needRepeatUntilSuccess && response.statusCode >= 300)
 

@@ -48,26 +48,5 @@ yarn-error.log*
 *.sln
 *.sw?
 
-src/main/resources/public
-/out/production/classes/META-INF/javalin-camunda-microservice.kotlin_module
-/out/production/resources/public/css/app.5f9dc29f.css
-/out/production/resources/public/css/app.ec7f573a.css
-/out/production/resources/public/js/app.4bc2490b.js
-/out/production/resources/public/js/app.4bc2490b.js.map
-/out/production/resources/public/js/app.b93c1857.js
-/out/production/resources/public/js/app.b93c1857.js.map
-/out/production/resources/public/js/chunk-vendors.0ef0b747.js
-/out/production/resources/public/js/chunk-vendors.0ef0b747.js.map
-/out/production/resources/public/js/chunk-vendors.580b6364.js
-/out/production/resources/public/js/chunk-vendors.580b6364.js.map
-/out/production/resources/public/favicon.ico
-/out/production/resources/public/index.html
-/out/production/resources/bad_process_1.bpmn
-/out/production/resources/bad_process_1.png
-/out/production/resources/process.bpmn
-/out/production/resources/process_v1.bpmn
-/out/production/resources/process_v1.png
-/out/production/resources/process_v2.bpmn
-/out/production/resources/process_v2.png
-/out/test/classes/META-INF/javalin-camunda-microservice.kotlin_module
+/out/*
 /process-engine.mv.db
