@@ -53,28 +53,6 @@ object AuditParseListener : AbstractBpmnParseListener() {
     }
 }
 
-object AuditTaskListener : TaskListener {
-    override fun notify(task: DelegateTask) {
-        Context.getCommandContext().transactionContext.addTransactionListener(TransactionState.COMMITTED) {
-            val message = "${task.eventName} ${task.name} in process ${task.execution.processBusinessKey}"
-            broadcastWsMessage(
-                TASK_INSTANCE_UPDATE,
-                JSON("{}")
-                    .prop("message", message)
-                    .prop(
-                        "type", when (task.eventName) {
-                            "create" -> "success"
-                            "delete" -> "warn"
-                            "complete" -> "success"
-                            else -> null
-                        }
-                    ),
-                task.processInstanceId
-            )
-        }
-    }
-}
-
 object UniquenessBusinessKeyProcessStartEventListener : ExecutionListener {
     override fun notify(execution: DelegateExecution) {
         val businessKey = execution.processBusinessKey
@@ -98,5 +76,27 @@ class NotUniqueBusinessKeyException : RuntimeException {
 
     companion object {
         private val serialVersionUID = -1L
+    }
+}
+
+object AuditTaskListener : TaskListener {
+    override fun notify(task: DelegateTask) {
+        Context.getCommandContext().transactionContext.addTransactionListener(TransactionState.COMMITTED) {
+            val message = "${task.eventName} ${task.name} in process ${task.execution.processBusinessKey}"
+            broadcastWsMessage(
+                TASK_INSTANCE_UPDATE,
+                JSON("{}")
+                    .prop("message", message)
+                    .prop(
+                        "type", when (task.eventName) {
+                            "create" -> "success"
+                            "delete" -> "warn"
+                            "complete" -> "success"
+                            else -> null
+                        }
+                    ),
+                task.processInstanceId
+            )
+        }
     }
 }

@@ -27,12 +27,15 @@ fun main() {
                 RuntimeContainerDelegate.INSTANCE.get().registerProcessEngine(
                     (ProcessEngineConfiguration.createStandaloneProcessEngineConfiguration()
                             as ProcessEngineConfigurationImpl).apply {
-                        processEnginePlugins.add(SpinProcessEnginePlugin())
+
                         processEnginePlugins.add(AuditParseListenerPlugin)
                         historyEventHandler = AuditDbHistoryEventHandler()
-                        defaultSerializationFormat = Variables.SerializationDataFormats.JSON.name
-                        databaseSchemaUpdate = ProcessEngineConfiguration.DB_SCHEMA_UPDATE_TRUE
                         transactionContextFactory = StandaloneTransactionContextFactory()
+
+                        processEnginePlugins.add(SpinProcessEnginePlugin())
+                        defaultSerializationFormat = Variables.SerializationDataFormats.JSON.name
+
+                        databaseSchemaUpdate = ProcessEngineConfiguration.DB_SCHEMA_UPDATE_TRUE
                         jdbcUrl = "jdbc:h2:mem:camunda"
                         isJobExecutorActivate = true
                         jdbcMaxActiveConnections = 25
@@ -72,19 +75,19 @@ fun main() {
         .ws("/events") { ws ->
             ws.onConnect { ctx ->
                 logMain.info("success connect")
-                processMap[ctx] = SUBSCRIBE_TO_ALL
+                wsConnections[ctx] = SUBSCRIBE_TO_ALL
                 updateState(ctx)
             }
             ws.onMessage { ctx ->
                 val prop = JSON(ctx.message()).prop("selectedProcessId")
                 val process = if (prop.isNull) SUBSCRIBE_TO_ALL else prop.stringValue()
-                processMap[ctx] = process
+                wsConnections[ctx] = process
                 logMain.info("choose process {}", process)
                 updateState(ctx)
             }
             ws.onClose { ctx ->
                 logMain.info("success disconnect")
-                processMap.remove(ctx)
+                wsConnections.remove(ctx)
             }
         }
 }

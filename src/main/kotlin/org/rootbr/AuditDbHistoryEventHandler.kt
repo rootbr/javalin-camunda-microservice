@@ -14,7 +14,10 @@ class AuditDbHistoryEventHandler : DbHistoryEventHandler() {
                 || historyEvent.isEventOfType(HistoryEventTypes.ACTIVITY_INSTANCE_MIGRATE)
                 || historyEvent.isEventOfType(HistoryEventTypes.ACTIVITY_INSTANCE_START)
                 || historyEvent.isEventOfType(HistoryEventTypes.ACTIVITY_INSTANCE_UPDATE) ) {
-            Context.getCommandContext().transactionContext.addTransactionListener(TransactionState.COMMITTED, BroadcastListener(historyEvent.processInstanceId))
+            Context.getCommandContext().transactionContext.addTransactionListener(
+                TransactionState.COMMITTED,
+                BroadcastListener(historyEvent.processInstanceId)
+            )
         }
         super.handleEvent(historyEvent)
     }
@@ -28,16 +31,12 @@ class BroadcastListener(val processInstanceId: String): TransactionListener{
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
-
         other as BroadcastListener
-
         if (processInstanceId != other.processInstanceId) return false
-
         return true
     }
 
     override fun hashCode(): Int {
         return processInstanceId.hashCode()
     }
-
 }

@@ -12,14 +12,21 @@ private val runtimeService = BpmPlatform.getDefaultProcessEngine().runtimeServic
 private val historyService = BpmPlatform.getDefaultProcessEngine().historyService
 private val repositoryService = BpmPlatform.getDefaultProcessEngine().repositoryService
 
-private val columnsProcesses = listOf(ColumnDto("id", "id", true), ColumnDto("businessKey", "businessKey"))
-private val columnsProcess = listOf(ColumnDto("variable", "id", true), ColumnDto("value", "value"))
+private val columnsProcesses = listOf(
+    ColumnDto("id", "id", true),
+    ColumnDto("businessKey", "businessKey"),
+    ColumnDto("state", "state")
+)
+private val columnsProcess = listOf(
+    ColumnDto("variable", "id", true),
+    ColumnDto("value", "value")
+)
 
 fun state(processId: String): Map<String, List<Any>> {
-    val variables = runtimeService.getVariables(processId)
+    val variables = historyService.createHistoricVariableInstanceQuery().processInstanceId(processId).list()
         .map {
             VariablesDto(
-                it.key,
+                it.name,
                 if (it.value == null) null else
                     if (it.value is SpinJsonNode) (it.value as SpinJsonNode).unwrap() else
                         it.value
@@ -34,8 +41,9 @@ fun state(processId: String): Map<String, List<Any>> {
 }
 
 fun state(): Map<String, List<Any>> {
-    val processes = runtimeService.createProcessInstanceQuery().list().map {
-        ProcessInstanceDto(it.processInstanceId, it.businessKey)
+
+    val processes = historyService.createHistoricProcessInstanceQuery().list().map {
+        ProcessInstanceDto(it.id, it.businessKey, it.state)
     }
     return mapOf(
         "activities" to historicActivities(),
@@ -184,7 +192,7 @@ fun correlateMessage(messageName: String, businessKey: String?, body: String?) {
     }
 }
 
-data class ProcessInstanceDto(val id: String, val businessKey: String?)
+data class ProcessInstanceDto(val id: String, val businessKey: String?, val state: String)
 data class VariablesDto(val id: String, val value: Any?)
 data class ColumnDto(val label: String, val name: String, val uniqueId: Boolean = false, val sort: Boolean = true)
 data class HistoricActivitiesStatDto(

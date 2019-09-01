@@ -9,13 +9,13 @@ import java.util.concurrent.ConcurrentHashMap
 
 const val SUBSCRIBE_TO_ALL = "all"
 
-val processMap = ConcurrentHashMap<WsContext, String>()
+val wsConnections = ConcurrentHashMap<WsContext, String>()
 
 private val logUpdateState = LoggerFactory.getLogger("update state")
 
 fun updateState(wsContext: WsContext) {
     logUpdateState.info("update state ws {}", wsContext)
-    val subscribed = processMap[wsContext]!!
+    val subscribed = wsConnections[wsContext]!!
     if (subscribed == SUBSCRIBE_TO_ALL) {
         wsContext.send(prepareMessage(ACTIVITY_INSTANCE_UPDATE, JSON(state())))
     } else {
@@ -25,7 +25,7 @@ fun updateState(wsContext: WsContext) {
 
 fun broadcastMessage(processId: String) {
     logUpdateState.info("update state process {}", processId)
-    val openSessions = processMap.filter { it.key.session.isOpen }
+    val openSessions = wsConnections.filter { it.key.session.isOpen }
 
     val subscribedToOneProcess = openSessions.filter { it.value == processId }
     if (subscribedToOneProcess.isNotEmpty()) {
@@ -40,18 +40,17 @@ fun broadcastMessage(processId: String) {
     }
 }
 
-fun prepareMessage(type: EventTypes, payload: SpinJsonNode) = JSON("{}")
-    .prop("type", type.toString())
-    .prop("payload", payload)
-    .unwrap()
-
 fun broadcastWsMessage(type: EventTypes, payload: SpinJsonNode, processId: String) {
-    processMap
+    wsConnections
         .filter { it.key.session.isOpen }
         .filter { it.value == processId || it.value == SUBSCRIBE_TO_ALL }
         .forEach { it.key.send(prepareMessage(type, payload)) }
 }
 
+fun prepareMessage(type: EventTypes, payload: SpinJsonNode) = JSON("{}")
+    .prop("type", type.toString())
+    .prop("payload", payload)
+    .unwrap()
 
 enum class EventTypes {
     ACTIVITY_INSTANCE_UPDATE, TASK_INSTANCE_UPDATE, ERROR
