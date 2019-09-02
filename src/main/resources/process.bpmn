@@ -327,7 +327,7 @@
       <bpmndi:BPMNShape id="BoundaryEvent_1i2mzal_di" bpmnElement="BoundaryEvent_0g8bxem">
         <dc:Bounds x="420" y="161" width="36" height="36" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="417" y="204" width="42" height="14" />
+          <dc:Bounds x="456" y="156" width="42" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="SequenceFlow_0u3amkw_di" bpmnElement="SequenceFlow_0u3amkw">
