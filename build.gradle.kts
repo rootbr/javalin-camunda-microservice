@@ -28,6 +28,8 @@ dependencies {
     implementation("io.javalin:javalin:3.1.0")
     implementation("ch.qos.logback:logback-classic:1.2.3")
 
+    implementation( "org.jboss.resteasy:resteasy-jaxrs:3.9.0.Final")
+    implementation( "org.camunda.bpm:camunda-engine-rest:7.11.0")
 
     implementation(kotlin("stdlib-jdk8"))
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.9.9")

@@ -2,6 +2,7 @@ package org.rootbr
 
 import org.camunda.bpm.BpmPlatform
 import org.camunda.bpm.engine.OptimisticLockingException
+import org.camunda.bpm.engine.rest.impl.DefaultProcessEngineRestServiceImpl
 import org.camunda.spin.Spin.JSON
 import org.camunda.spin.json.SpinJsonNode
 import org.slf4j.LoggerFactory
@@ -11,6 +12,8 @@ private val logCamunda = LoggerFactory.getLogger("camunda")
 private val runtimeService = BpmPlatform.getDefaultProcessEngine().runtimeService
 private val historyService = BpmPlatform.getDefaultProcessEngine().historyService
 private val repositoryService = BpmPlatform.getDefaultProcessEngine().repositoryService
+
+val rest = DefaultProcessEngineRestServiceImpl()
 
 private val columnsProcesses = listOf(
     ColumnDto("id", "id", true),

@@ -13,17 +13,11 @@ Content-Type: application/json
 
 {"var3":"val3"}
 ###
-POST http://localhost:8080/api/message/ERROR?businessKey=2
+POST http://localhost:8080/api/message/ERROR?businessKey=1
 Content-Type: application/json
-
 ###
 POST http://localhost:8080/api/message/NEXT_1
 Content-Type: application/json
-###
-POST http://localhost:8080/api/message/UPDATE?businessKey=1
-Content-Type: application/json
-
-{"var3":"val3"}
 ###
 POST http://localhost:8080/api/message/UPDATE_SUBPROCESS?businessKey=1
 Content-Type: application/json
@@ -39,4 +33,36 @@ POST http://localhost:8080/api/message/BACK?businessKey=5
 Content-Type: application/json
 
 {"var3":"val3"}
+###
+POST http://localhost:8080/api/message/UPDATE?businessKey=1
+Content-Type: application/json
+
+{"var3":"val3"}
+###
+POST http://localhost:8080/api/external-task/fetchAndLock
+Content-Type: application/json
+
+{
+  "workerId":"aWorkerId",
+  "maxTasks":2,
+  "usePriority":true,
+  "topics":
+  [{"topicName": "decision",
+    "lockDuration": 10000,
+    "variables": []
+  }]
+}
+###
+POST http://localhost:8080/api/external-task/46/complete
+Content-Type: application/json
+
+{
+  "workerId": "aWorkerId",
+  "variables":
+  {"aVariable": {"value": "aStringValue"},
+    "anotherVariable": {"value": 42},
+    "aThirdVariable": {"value": true}},
+  "localVariables":
+  {"aLocalVariable": {"value": "aStringValue"}}
+}
 ###

@@ -6,6 +6,8 @@ import org.camunda.bpm.container.RuntimeContainerDelegate
 import org.camunda.bpm.engine.ProcessEngineConfiguration
 import org.camunda.bpm.engine.impl.cfg.ProcessEngineConfigurationImpl
 import org.camunda.bpm.engine.impl.util.ReflectUtil
+import org.camunda.bpm.engine.rest.dto.externaltask.CompleteExternalTaskDto
+import org.camunda.bpm.engine.rest.dto.externaltask.FetchExternalTasksDto
 import org.camunda.bpm.engine.variable.Variables
 import org.camunda.spin.Spin.JSON
 import org.camunda.spin.plugin.impl.SpinProcessEnginePlugin
@@ -47,6 +49,22 @@ fun main() {
         .start(8080)
         .routes {
             path("/api") {
+                path("/external-task") {
+                    path("/fetchAndLock") {
+                        post { ctx ->
+                            val fetchExternalTasksDto = ctx.body<FetchExternalTasksDto>()
+                            ctx.json(rest.externalTaskRestService.fetchAndLock(fetchExternalTasksDto))
+                        }
+                    }
+                    path("/:task-id/complete") {
+                        post { ctx ->
+                            rest.externalTaskRestService
+                                .getExternalTask(ctx.pathParam(":task-id"))
+                                .complete(ctx.body<CompleteExternalTaskDto>())
+                            ctx.status(204)
+                        }
+                    }
+                }
                 path("/state") {
                     get { it.json(state()) }
                     path("/:processId") {
