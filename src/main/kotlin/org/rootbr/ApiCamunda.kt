@@ -1,12 +1,14 @@
 package org.rootbr
 
+import io.javalin.plugin.json.JavalinJackson
 import org.camunda.bpm.BpmPlatform
 import org.camunda.bpm.engine.OptimisticLockingException
-import org.camunda.bpm.engine.rest.impl.DefaultProcessEngineRestServiceImpl
+import org.camunda.bpm.engine.rest.impl.AbstractProcessEngineRestServiceImpl
 import org.camunda.spin.Spin.JSON
 import org.camunda.spin.json.SpinJsonNode
 import org.slf4j.LoggerFactory
 import java.io.InputStream
+import java.net.URI
 
 private val logCamunda = LoggerFactory.getLogger("camunda")
 private val runtimeService = BpmPlatform.getDefaultProcessEngine().runtimeService
@@ -14,6 +16,12 @@ private val historyService = BpmPlatform.getDefaultProcessEngine().historyServic
 private val repositoryService = BpmPlatform.getDefaultProcessEngine().repositoryService
 
 val rest = DefaultProcessEngineRestServiceImpl()
+class DefaultProcessEngineRestServiceImpl : AbstractProcessEngineRestServiceImpl() {
+    override fun getRelativeEngineUri(engineName: String?): URI {
+        return URI.create("/")
+    }
+    override fun getObjectMapper()= JavalinJackson.getObjectMapper()
+}
 
 private val columnsProcesses = listOf(
     ColumnDto("id", "id", true),

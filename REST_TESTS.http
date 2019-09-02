@@ -53,14 +53,14 @@ Content-Type: application/json
   }]
 }
 ###
-POST http://localhost:8080/api/external-task/46/complete
+POST http://localhost:8080/api/external-task/62/complete
 Content-Type: application/json
 
 {
   "workerId": "aWorkerId",
   "variables":
   {"aVariable": {"value": "aStringValue"},
-    "anotherVariable": {"value": 42},
+    "anotherVariable": {"value": 62},
     "aThirdVariable": {"value": true}},
   "localVariables":
   {"aLocalVariable": {"value": "aStringValue"}}

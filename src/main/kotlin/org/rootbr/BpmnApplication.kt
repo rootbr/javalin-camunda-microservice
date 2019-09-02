@@ -52,13 +52,14 @@ fun main() {
                 path("/external-task") {
                     path("/fetchAndLock") {
                         post { ctx ->
-                            val fetchExternalTasksDto = ctx.body<FetchExternalTasksDto>()
-                            ctx.json(rest.externalTaskRestService.fetchAndLock(fetchExternalTasksDto))
+                            ctx.json(
+                                rest.getExternalTaskRestService(null)
+                                    .fetchAndLock(ctx.body<FetchExternalTasksDto>()))
                         }
                     }
                     path("/:task-id/complete") {
                         post { ctx ->
-                            rest.externalTaskRestService
+                            rest.getExternalTaskRestService(null)
                                 .getExternalTask(ctx.pathParam(":task-id"))
                                 .complete(ctx.body<CompleteExternalTaskDto>())
                             ctx.status(204)
