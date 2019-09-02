@@ -82,7 +82,7 @@ class NotUniqueBusinessKeyException : RuntimeException {
 object AuditTaskListener : TaskListener {
     override fun notify(task: DelegateTask) {
         Context.getCommandContext().transactionContext.addTransactionListener(TransactionState.COMMITTED) {
-            val message = "${task.eventName} ${task.name} in process ${task.execution.processBusinessKey}"
+            val message = "${task.eventName} task \"${task.name}\" in process ${task.execution.processBusinessKey}"
             broadcastWsMessage(
                 TASK_INSTANCE_UPDATE,
                 JSON("{}")

@@ -71,47 +71,9 @@ class ApiCamundaTest {
 
         concurrentSendMessage(
             businessKey = businessKey,
-            messageName = "UPDATE_SUBPROCESS",
-            repeatTimes = Runtime.getRuntime().availableProcessors(),
-            needPayload = false
-        )
-    }
-
-    @Test
-    @DisplayName("businessKey 5 - старт подпроцессов с повтором до успеха")
-    fun test5() {
-        val businessKey = "51"
-
-        concurrentSendMessage(
-            messageName = "START",
-            businessKey = businessKey
-        )
-
-        concurrentSendMessage(
-            businessKey = businessKey,
-            messageName = "UPDATE_SUBPROCESS",
-            repeatTimes = Runtime.getRuntime().availableProcessors(),
-            needPayload = true,
-            needRepeatUntilSuccess = true
-        )
-    }
-
-    @Test
-    @DisplayName("businessKey 6 - старт подпроцессов с сигналами")
-    fun test6() {
-        val businessKey = "6"
-
-        concurrentSendMessage(
-            messageName = "START",
-            businessKey = businessKey
-        )
-
-        concurrentSendMessage(
-            businessKey = businessKey,
             messageName = "UPDATE_SUBPROCESS_2",
             repeatTimes = Runtime.getRuntime().availableProcessors(),
-            needPayload = true,
-            needRepeatUntilSuccess = true
+            needPayload = false
         )
     }
 }
@@ -133,7 +95,7 @@ fun concurrentSendMessage(
             callingThreadBlocker = callingThreadBlocker,
             completedThreadCounter = completedThreadCounter,
             readyThreadCounter = readyThreadCounter,
-            variables = if (needPayload) mapOf("property" to it) else null,
+            variables = if (needPayload) mapOf("property" to it.toString()) else null,
             needRepeatUntilSuccess = needRepeatUntilSuccess
         ).start()
     }

@@ -102,21 +102,21 @@ fun deploy(filename: String, content: InputStream) = repositoryService.createDep
     .deployWithResult()
     .deployedProcessDefinitions?.let { logCamunda.info("Deploy resource \"${it[0].key}\", version ${it[0].version}") }
 
-private fun messageEventReceived(messageName: String, processId: String, body: SpinJsonNode?) {
+private fun messageEventReceived(messageName: String, executionId: String, body: SpinJsonNode?, processId: String?) {
     try {
         if (body != null && !body.isNull) {
-            runtimeService.messageEventReceived(messageName, processId, mapOf(messageName to body))
+            runtimeService.messageEventReceived(messageName, executionId, mapOf(messageName to body))
         } else {
-            runtimeService.messageEventReceived(messageName, processId)
+            runtimeService.messageEventReceived(messageName, executionId)
         }
     } catch (e: OptimisticLockingException) {
-        logCamunda.warn(e.message)
+        logCamunda.warn(e.message, e)
         broadcastWsMessage(
             EventTypes.ERROR,
             JSON("{}")
                 .prop("message", e.message)
                 .prop("type", "error"),
-            processId
+            processId ?: SUBSCRIBE_TO_ALL
         )
     } catch (e: NotUniqueBusinessKeyException) {
         logCamunda.warn(e.message)
@@ -125,7 +125,7 @@ private fun messageEventReceived(messageName: String, processId: String, body: S
             JSON("{}")
                 .prop("message", e.message)
                 .prop("type", "error"),
-            processId
+            processId ?: SUBSCRIBE_TO_ALL
         )
     } catch (e: RuntimeException) {
         broadcastWsMessage(
@@ -133,7 +133,7 @@ private fun messageEventReceived(messageName: String, processId: String, body: S
             JSON("{}")
                 .prop("message", e.message)
                 .prop("type", "error"),
-            processId
+            processId ?: SUBSCRIBE_TO_ALL
         )
     }
 }
@@ -152,7 +152,7 @@ private fun messageEventReceivedForStart(messageName: String, businessKey: Strin
                 runtimeService.startProcessInstanceByMessage(messageName, businessKey)
         }
     } catch (e: OptimisticLockingException) {
-        logCamunda.warn(e.message)
+        logCamunda.warn(e.message, e)
         broadcastWsMessage(
             EventTypes.ERROR,
             JSON("{}")
@@ -196,7 +196,7 @@ fun correlateMessage(messageName: String, businessKey: String?, body: String?) {
                 val processInstance =
                     runtimeService.createProcessInstanceQuery().processInstanceId(it.processInstanceId).singleResult()
                 if (processInstance.businessKey == businessKey) {
-                    messageEventReceived(messageName, it.executionId, json)
+                    messageEventReceived(messageName, it.executionId, json, it.processInstanceId)
                 }
             }
         }

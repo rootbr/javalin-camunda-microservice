@@ -8,13 +8,13 @@ Content-Type: application/json
 
 {"var2":"val2"}
 ###
+POST http://localhost:8080/api/message/ERROR?businessKey=1
+Content-Type: application/json
+###
 POST http://localhost:8080/api/message/NEXT?businessKey=1
 Content-Type: application/json
 
 {"var3":"val3"}
-###
-POST http://localhost:8080/api/message/ERROR?businessKey=1
-Content-Type: application/json
 ###
 POST http://localhost:8080/api/message/NEXT_1
 Content-Type: application/json
@@ -53,7 +53,7 @@ Content-Type: application/json
   }]
 }
 ###
-POST http://localhost:8080/api/external-task/62/complete
+POST http://localhost:8080/api/external-task/27/complete
 Content-Type: application/json
 
 {
