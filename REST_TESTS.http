@@ -48,7 +48,7 @@ Content-Type: application/json
   "usePriority":true,
   "topics":
   [{"topicName": "decision",
-    "lockDuration": 10000,
+    "lockDuration": 100,
     "variables": []
   }]
 }
